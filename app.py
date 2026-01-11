@@ -1,152 +1,153 @@
 import streamlit as st
 import sqlite3
 import pandas as pd
-from fpdf import FPDF
 
-# --- 1. CONFIGURATION DE LA PAGE ---
+# --- 1. CONFIGURATION ---
 st.set_page_config(page_title="Menu Express PRO", page_icon="🍴", layout="wide")
 
-# --- 2. DESIGN LUXE & IMAGE DE SECOND PLAN (CSS) ---
+# --- 2. CSS LUXE ---
 st.markdown("""
     <style>
-    /* Image de fond et overlay sombre */
     .stApp {
         background-image: url("https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?q=80&w=2070&auto=format&fit=crop");
-        background-size: cover;
-        background-attachment: fixed;
-        color: #ffffff;
+        background-size: cover; background-attachment: fixed; color: #ffffff;
     }
     .stApp::before {
         content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-        background-color: rgba(0, 0, 0, 0.75); z-index: -1;
+        background-color: rgba(0, 0, 0, 0.8); z-index: -1;
     }
-
-    /* Barre latérale */
-    [data-testid="stSidebar"] { background-color: #111111; border-right: 1px solid #d4af37; }
-    
-    /* Cartes des plats */
     .plat-card {
-        padding: 20px; border-radius: 15px; background-color: rgba(38, 38, 38, 0.9);
-        box-shadow: 0 4px 20px rgba(0,0,0,0.5); border: 1px solid #d4af37;
-        margin-bottom: 20px; display: flex; align-items: center;
+        padding: 20px; border-radius: 15px; background-color: rgba(30, 30, 30, 0.9);
+        border: 1px solid #d4af37; margin-bottom: 20px; display: flex; align-items: center;
     }
-    
     .plat-image {
-        width: 120px; height: 120px; border-radius: 10px;
+        width: 110px; height: 110px; border-radius: 10px;
         object-fit: cover; margin-right: 20px; border: 1px solid #d4af37;
     }
-
     h1, h2, h3 { color: #d4af37 !important; }
-    .prix { color: #d4af37; font-weight: bold; font-size: 1.8rem; margin-left: auto; }
-    
-    /* Barre de recherche stylisée */
-    .stTextInput > div > div > input {
-        border: 2px solid #d4af37 !important;
-        border-radius: 25px !important;
-        background-color: #333333 !important;
-        color: white !important;
-        padding: 10px 20px !important;
-    }
-
-    .stButton>button {
-        background-color: #d4af37 !important; color: #1a1a1a !important;
-        font-weight: bold; border-radius: 25px; border: none; width: 100%;
-    }
+    .prix { color: #d4af37; font-weight: bold; font-size: 1.4rem; margin-left: auto; }
     </style>
     """, unsafe_allow_html=True)
 
 # --- 3. BASE DE DONNÉES ---
-conn = sqlite3.connect('menu_pro.db', check_same_thread=False)
+def get_db():
+    conn = sqlite3.connect('menu_pro.db', check_same_thread=False)
+    c = conn.cursor()
+    c.execute('CREATE TABLE IF NOT EXISTS menu (id INTEGER PRIMARY KEY AUTOINCREMENT, nom TEXT, prix REAL, desc TEXT, img TEXT)')
+    c.execute('''CREATE TABLE IF NOT EXISTS commandes 
+                 (id INTEGER PRIMARY KEY AUTOINCREMENT, articles TEXT, total REAL, 
+                  type_commande TEXT, detail_logistique TEXT, statut TEXT DEFAULT 'En attente', 
+                  date DATETIME DEFAULT CURRENT_TIMESTAMP)''')
+    conn.commit()
+    return conn
+
+conn = get_db()
 c = conn.cursor()
-c.execute('CREATE TABLE IF NOT EXISTS menu (id INTEGER PRIMARY KEY AUTOINCREMENT, nom TEXT, prix REAL, desc TEXT, img TEXT)')
-c.execute('CREATE TABLE IF NOT EXISTS commandes (id INTEGER PRIMARY KEY AUTOINCREMENT, articles TEXT, total REAL, statut TEXT, date DATETIME DEFAULT CURRENT_TIMESTAMP)')
-conn.commit()
 
-# --- 4. NAVIGATION & SÉCURITÉ ---
-if 'admin_mode' not in st.session_state: st.session_state.admin_mode = False
+# --- 4. GESTION DE LA CONNEXION (Mémoire de session) ---
+if 'admin_ok' not in st.session_state:
+    st.session_state.admin_ok = False
 
+# --- 5. BARRE LATÉRALE ---
 with st.sidebar:
     st.title("⚜️ Menu Express")
+    
     pages = ["🍽️ Menu Client", "🛒 Mon Panier"]
-    if st.session_state.admin_mode: pages.extend(["👩‍💼 Gérante (Admin)", "📊 Historique"])
-    page = st.radio("Navigation", pages)
+    if st.session_state.admin_ok:
+        pages.extend(["👩‍💼 Gérante (Admin)", "📊 Commandes Reçues"])
+    
+    choice = st.radio("Navigation", pages)
     
     st.divider()
-    with st.expander("🔐 Accès Gérante"):
-        pwd = st.text_input("Code secret", type="password")
-        if pwd == "admin123":
-            st.session_state.admin_mode = True
-            st.success("Accès Gérante Activé")
-        else: st.session_state.admin_mode = False
-
-# --- 5. LOGIQUE DES PAGES ---
-
-if page == "🍽️ Menu Client":
-    st.header("🍴 Menu Express")
-    
-    # Barre de recherche personnalisée
-    search_term = st.text_input("", placeholder="🔍 Quel délice recherchez-vous ? (ex: Burger, Pizza...)", label_visibility="collapsed")
-    
-    items = pd.read_sql('SELECT * FROM menu', conn)
-    if search_term:
-        items = items[items['nom'].str.contains(search_term, case=False) | items['desc'].str.contains(search_term, case=False)]
-
-    if items.empty:
-        st.info("Aucun plat trouvé. Revenez plus tard !")
+    if not st.session_state.admin_ok:
+        with st.expander("🔐 Espace Gérante"):
+            p_admin = st.text_input("Code", type="password")
+            if st.button("Se connecter"):
+                if p_admin == "admin123":
+                    st.session_state.admin_ok = True
+                    st.rerun()
+                else:
+                    st.error("Mauvais code")
     else:
-        for _, row in items.iterrows():
+        if st.button("🔴 Se déconnecter"):
+            st.session_state.admin_ok = False
+            st.rerun()
+
+# --- 6. PAGES ---
+
+if choice == "🍽️ Menu Client":
+    st.header("🍴 Notre Carte")
+    df = pd.read_sql('SELECT * FROM menu', conn)
+    if df.empty:
+        st.info("Menu vide. La gérante doit ajouter des plats.")
+    else:
+        for _, row in df.iterrows():
+            img = row['img'] if row['img'] else "https://via.placeholder.com/150"
             st.markdown(f"""
                 <div class="plat-card">
-                    <img src="{row['img'] if row['img'] else 'https://via.placeholder.com/150'}" class="plat-image">
-                    <div>
-                        <h3>{row['nom']}</h3>
-                        <p>{row['desc']}</p>
-                    </div>
-                    <span class="prix">{row['prix']} €</span>
+                    <img src="{img}" class="plat-image">
+                    <div><h3>{row['nom']}</h3><p>{row['desc']}</p></div>
+                    <span class="prix">{int(row['prix'])} FCFA</span>
                 </div>
             """, unsafe_allow_html=True)
-            if st.button(f"Ajouter au panier", key=row['id']):
+            if st.button(f"Ajouter au panier", key=f"add_{row['id']}"):
                 if 'cart' not in st.session_state: st.session_state.cart = []
                 st.session_state.cart.append({"nom": row['nom'], "prix": row['prix']})
                 st.toast(f"✅ {row['nom']} ajouté !")
 
-elif page == "🛒 Mon Panier":
+elif choice == "🛒 Mon Panier":
     st.header("🛍️ Votre Panier")
     if 'cart' not in st.session_state or not st.session_state.cart:
-        st.write("Votre panier est vide.")
+        st.write("Le panier est vide.")
     else:
-        total = sum(item['prix'] for item in st.session_state.cart)
-        for i, item in enumerate(st.session_state.cart):
-            st.write(f"• **{item['nom']}** - {item['prix']} €")
+        total = sum(i['prix'] for i in st.session_state.cart)
+        for i in st.session_state.cart:
+            st.write(f"- {i['nom']} : {int(i['prix'])} FCFA")
+        
         st.divider()
-        st.subheader(f"Total à payer : {total} €")
-        if st.button("Confirmer la commande", type="primary"):
-            c.execute('INSERT INTO commandes (articles, total, statut) VALUES (?,?,?)', (str(st.session_state.cart), total, "En attente"))
-            conn.commit()
-            st.balloons()
-            st.success("Commande envoyée en cuisine !")
-            st.session_state.cart = []
+        service = st.radio("Mode de service :", ["Sur place", "Livraison"])
+        
+        infos = ""
+        if service == "Sur place":
+            infos = st.text_input("Numéro de table")
+        else:
+            tel = st.text_input("Téléphone")
+            adr = st.text_input("Adresse de livraison")
+            infos = f"Tel: {tel} | Adresse: {adr}"
+            
+        st.subheader(f"Total : {int(total)} FCFA")
+        if st.button("🚀 Confirmer la commande"):
+            if not infos:
+                st.error("Remplissez les informations de service !")
+            else:
+                c.execute('INSERT INTO commandes (articles, total, type_commande, detail_logistique) VALUES (?,?,?,?)',
+                          (str(st.session_state.cart), total, service, infos))
+                conn.commit()
+                st.session_state.cart = []
+                st.success("Commande envoyée !")
+                st.balloons()
 
-elif page == "👩‍💼 Gérante (Admin)" and st.session_state.admin_mode:
-    st.header("Gestion de la Carte")
-    with st.form("ajout_plat"):
-        col1, col2 = st.columns(2)
-        n = col1.text_input("Nom du plat")
-        p = col1.number_input("Prix (€)", min_value=0.0)
-        i = col2.text_input("Lien de la photo (URL)")
-        d = col2.text_area("Description")
-        if st.form_submit_button("Ajouter à la carte"):
+elif choice == "👩‍💼 Gérante (Admin)":
+    st.header("⚙️ Ajouter un plat")
+    with st.form("add_form"):
+        n = st.text_input("Nom")
+        p = st.number_input("Prix (FCFA)", min_value=0)
+        i = st.text_input("Lien Image")
+        d = st.text_area("Description")
+        if st.form_submit_button("Enregistrer"):
             c.execute('INSERT INTO menu (nom, prix, desc, img) VALUES (?,?,?,?)', (n,p,d,i))
             conn.commit()
             st.success("Plat ajouté !")
             st.rerun()
-    st.divider()
-    st.subheader("Plats actuels")
-    st.dataframe(pd.read_sql('SELECT * FROM menu', conn), use_container_width=True)
 
-elif page == "📊 Historique" and st.session_state.admin_mode:
-    st.header("Commandes Reçues")
+elif choice == "📊 Commandes Reçues":
+    st.header("📋 Historique")
     cmds = pd.read_sql('SELECT * FROM commandes ORDER BY date DESC', conn)
-    for _, cmd in cmds.iterrows():
-        with st.expander(f"Commande #{cmd['id']} - {cmd['total']} € - {cmd['date']}"):
-            st.write(f"Détail : {cmd['articles']}")
+    for _, row in cmds.iterrows():
+        with st.expander(f"Commande #{row['id']} - {row['type_commande']} - {int(row['total'])} FCFA"):
+            st.write(f"**Articles:** {row['articles']}")
+            st.write(f"**Service:** {row['detail_logistique']}")
+            if st.button("🗑️ Supprimer", key=f"del_{row['id']}"):
+                c.execute('DELETE FROM commandes WHERE id=?', (row['id'],))
+                conn.commit()
+                st.rerun()
