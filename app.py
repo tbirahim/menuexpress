@@ -80,7 +80,6 @@ with st.sidebar:
 if choice == "🍽️ Commander":
     st.header("🍴 Notre Carte")
     
-    # AFFICHAGE DU MENU
     df = pd.read_sql('SELECT * FROM menu', conn)
     if df.empty:
         st.info("La carte est vide.")
@@ -93,16 +92,14 @@ if choice == "🍽️ Commander":
                 st.toast(f"✅ {row['nom']} ajouté !")
 
     st.write("---")
-    
-    # SECTION PANIER (EN BAS DU MENU)
     st.header("🛒 Ma Commande")
     
     if st.session_state.cmd_faite:
-        st.success("✅ Commande enregistrée !")
+        st.success("✅ Commande enregistrée dans le système !")
         st.markdown(f"""
             <a href="{st.session_state.wa_link}" target="_blank" style="text-decoration:none;">
                 <div style="background-color:#25D366; color:white; padding:20px; text-align:center; border-radius:10px; font-weight:bold; font-size:1.3rem; border: 2px solid white;">
-                    🟢 ENVOYER SUR WHATSAPP
+                    🟢 DERNIÈRE ÉTAPE : ENVOYER PAR WHATSAPP
                 </div>
             </a>
         """, unsafe_allow_html=True)
@@ -112,7 +109,7 @@ if choice == "🍽️ Commander":
             st.rerun()
 
     elif not st.session_state.cart:
-        st.write("Votre panier est vide. Cliquez sur 'Ajouter' au-dessus.")
+        st.write("Votre panier est vide.")
     
     else:
         with st.container():
@@ -125,22 +122,29 @@ if choice == "🍽️ Commander":
             
             st.subheader(f"Total : {int(total)} FCFA")
             
-            col_a, col_b = st.columns(2)
-            with col_a:
-                service = st.radio("Mode", ["Sur place", "Livraison"])
-            with col_b:
-                infos = st.text_input("N° Table ou Adresse/Tel")
+            service = st.radio("Mode de service", ["Sur place", "Livraison"], horizontal=True)
             
-            if st.button("🚀 VALIDER LA COMMANDE"):
-                if not infos:
-                    st.error("Précisez la table ou l'adresse !")
+            logistique = ""
+            if service == "Sur place":
+                logistique = st.text_input("Numéro de Table")
+            else:
+                col_tel, col_adr = st.columns(2)
+                with col_tel:
+                    client_tel = st.text_input("Votre téléphone")
+                with col_adr:
+                    client_adr = st.text_input("Votre adresse de livraison")
+                logistique = f"Tel: {client_tel} | Adresse: {client_adr}"
+            
+            if st.button("🚀 VALIDER MA COMMANDE"):
+                if not logistique or (service == "Livraison" and (not client_tel or not client_adr)):
+                    st.error("Veuillez remplir toutes les informations !")
                 else:
                     c.execute('INSERT INTO commandes (articles, total, type_commande, detail_logistique) VALUES (?,?,?,?)',
-                              (str(st.session_state.cart), total, service, infos))
+                              (str(st.session_state.cart), total, service, logistique))
                     conn.commit()
                     
                     num_gerante = "221777743766" # <--- METS TON NUMÉRO ICI
-                    msg = f"Nouvelle commande :%0A{txt_items}%0A*Total :* {int(total)} FCFA%0A*Mode :* {service}%0A*Infos :* {infos}"
+                    msg = f"Nouvelle commande :%0A{txt_items}%0A*Total :* {int(total)} FCFA%0A*Mode :* {service}%0A*Infos :* {logistique}"
                     st.session_state.wa_link = f"https://wa.me/{num_gerante}?text={msg}"
                     
                     st.session_state.cart = []
@@ -173,7 +177,7 @@ elif choice == "📊 Commandes Reçues":
     from streamlit_autorefresh import st_autorefresh
     st_autorefresh(interval=30000, key="auto_refresh")
     
-    if st.button("🧹 Vider tout"):
+    if st.button("🧹 Vider l'historique"):
         c.execute("DELETE FROM commandes")
         conn.commit()
         st.rerun()
