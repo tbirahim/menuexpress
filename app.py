@@ -1,116 +1,228 @@
 import streamlit as st
-import pandas as pd
 import sqlite3
+import pandas as pd
 import json
-import re
 import urllib.parse
-from datetime import datetime
 
-# --- CONFIGURATION DE LA PAGE ---
-st.set_page_config(page_title="Système de Commande", page_icon="🍴")
+# --- 1. CONFIGURATION ---
+st.set_page_config(page_title="Menu Express PRO", page_icon="🥘", layout="wide")
 
-# --- STYLE PERSONNALISÉ (CSS) ---
+if "PASSWORD" not in st.secrets:
+    st.error("Mot de passe admin non configuré.")
+    st.stop()
+
+ADMIN_PASSWORD = st.secrets["PASSWORD"]
+
+# --- 2. DESIGN ---
 st.markdown("""
-    <style>
-    /* Style pour les cartes de menu */
-    .menu-card {
-        background-color: #1e1e1e;
-        color: #f1c40f;
-        padding: 20px;
-        border-radius: 15px;
-        border: 1px solid #f1c40f;
-        margin-bottom: 10px;
-        text-align: center;
-    }
-    /* Style pour le titre principal */
-    .main-title {
-        font-weight: bold;
-        font-size: 42px;
-        display: flex;
-        align-items: center;
-        gap: 15px;
-    }
-    </style>
-    """, unsafe_allow_html=True)
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
+* { font-family: 'Montserrat', sans-serif; }
 
-# --- INITIALISATION BASE DE DONNÉES ---
+.stApp {
+    background: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.85)), 
+    url("https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=2070");
+    background-size: cover;
+    background-attachment: fixed;
+}
+
+.plat-card {
+    padding: 20px;
+    border-radius: 20px;
+    background-color: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+}
+
+.prix {
+    color: #25D366;
+    font-size: 1.4rem;
+    font-weight: bold;
+    margin-left: auto;
+}
+
+.cart-section {
+    background-color: rgba(0,0,0,0.9);
+    padding: 25px;
+    border-radius: 20px;
+    border: 2px solid #25D366;
+}
+</style>
+""", unsafe_allow_html=True)
+
+# --- 3. BASE DE DONNÉES ---
 def init_db():
-    conn = sqlite3.connect('restau_data.db')
-    cursor = conn.cursor()
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS commandes (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            client_nom TEXT, telephone TEXT, articles_json TEXT,
-            total_prix REAL, date_commande TEXT
-        )
-    ''')
+    conn = sqlite3.connect("menu_pro.db", check_same_thread=False)
+    c = conn.cursor()
+    c.execute("""CREATE TABLE IF NOT EXISTS menu (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        nom TEXT, prix REAL, desc TEXT, img TEXT)""")
+    c.execute("""CREATE TABLE IF NOT EXISTS commandes (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        articles TEXT, total REAL,
+        type_commande TEXT, detail_logistique TEXT,
+        date DATETIME DEFAULT CURRENT_TIMESTAMP)""")
     conn.commit()
     return conn
 
-# --- GESTION DU PANIER ---
-if 'panier' not in st.session_state:
-    st.session_state.panier = []
+conn = init_db()
+c = conn.cursor()
 
-def ajouter_au_panier(nom, prix):
-    st.session_state.panier.append({"nom": nom, "prix": prix})
-    st.toast(f"✅ **{nom}** ajouté !", icon="🛒")
+# --- 4. SESSION ---
+if "admin_ok" not in st.session_state: st.session_state.admin_ok = False
+if "cart" not in st.session_state: st.session_state.cart = []
+if "cmd_faite" not in st.session_state: st.session_state.cmd_faite = False
+if "wa_link" not in st.session_state: st.session_state.wa_link = ""
 
-# --- INTERFACE : MENU (Comme votre 3ème image) ---
-st.markdown('<div class="main-title">🍴 Système de Commande</div>', unsafe_allow_html=True)
+# --- 5. NAVIGATION ---
+with st.sidebar:
+    st.title("⚜️ Menu Express")
+    choice = st.radio("Aller vers", ["🍽️ Commander", "📊 Espace Gérant"] if st.session_state.admin_ok else ["🍽️ Commander"])
 
-st.write("### Notre Menu")
-col_m1, col_m2 = st.columns(2)
-
-with col_m1:
-    st.markdown('<div class="menu-card">🍱<br><b>Thieboudienne</b><br>2500 FCFA</div>', unsafe_allow_html=True)
-    if st.button("Ajouter au panier", key="btn1"):
-        ajouter_au_panier("Thieboudienne", 2500)
-
-with col_m2:
-    st.markdown('<div class="menu-card">🍗<br><b>Yassa Poulet</b><br>2000 FCFA</div>', unsafe_allow_html=True)
-    if st.button("Ajouter au panier", key="btn2"):
-        ajouter_au_panier("Yassa Poulet", 2000)
-
-# --- INTERFACE : RÉCAPITULATIF (Comme votre 2ème image) ---
-st.write("")
-with st.expander("▼ Voir mon panier", expanded=True):
-    if not st.session_state.panier:
-        st.write("Votre panier est vide.")
-        total_commande = 0
+    if not st.session_state.admin_ok:
+        with st.expander("🔐 Connexion Gérant"):
+            pwd = st.text_input("Mot de passe", type="password")
+            if st.button("Se connecter"):
+                if pwd == ADMIN_PASSWORD:
+                    st.session_state.admin_ok = True
+                    st.rerun()
+                else:
+                    st.error("Code incorrect")
     else:
-        for i, item in enumerate(st.session_state.panier):
-            # Simulation des checkbox vertes de la capture
-            st.checkbox(f"{item['nom']} - {item['prix']} FCFA", value=True, key=f"check_{i}")
-        
-        total_commande = sum(item['prix'] for item in st.session_state.panier)
-        st.markdown(f"### Total : {total_commande} FCFA")
+        if st.button("🔴 Déconnexion"):
+            st.session_state.admin_ok = False
+            st.rerun()
 
-# --- FORMULAIRE FINAL ---
-st.write("### Finaliser la commande")
-with st.container():
-    nom = st.text_input("Votre Nom", placeholder="vb")
-    tel = st.text_input("Numéro de téléphone (9 chiffres min)", placeholder="999999999")
-    
-    if st.button("Enregistrer la commande", use_container_width=True, type="primary"):
-        if len(st.session_state.panier) == 0:
-            st.warning("Votre panier est vide !")
-        elif not nom or not re.fullmatch(r'\d{9,}', tel):
-            st.error("Veuillez vérifier vos informations (Nom et Téléphone).")
+# --- 6. PAGE CLIENT ---
+if choice == "🍽️ Commander":
+    st.title("👨‍🍳 Notre Carte")
+
+    df = pd.read_sql("SELECT * FROM menu", conn)
+
+    for _, row in df.iterrows():
+        img = row["img"] if row["img"] else "https://via.placeholder.com/150"
+        st.markdown(f"""
+        <div class="plat-card">
+            <img src="{img}" style="width:100px;height:100px;border-radius:12px;margin-right:20px;">
+            <div>
+                <h3>{row['nom']}</h3>
+                <p style="color:#ccc;">{row['desc']}</p>
+            </div>
+            <span class="prix">{int(row['prix'])} F</span>
+        </div>
+        """, unsafe_allow_html=True)
+
+        qte = st.number_input(f"Quantité pour {row['nom']}", 1, 20, 1, key=f"qte_{row['id']}")
+        if st.button("Ajouter au panier", key=f"add_{row['id']}"):
+            st.session_state.cart.append({
+                "nom": row["nom"],
+                "prix": row["prix"],
+                "qte": qte
+            })
+            st.toast("Ajouté au panier")
+
+    # --- PANIER ---
+    if st.session_state.cart:
+        st.markdown('<div class="cart-section">', unsafe_allow_html=True)
+        st.header("🛒 Mon panier")
+
+        total = 0
+        for i, item in enumerate(st.session_state.cart):
+            sous_total = item["prix"] * item["qte"]
+            total += sous_total
+
+            col1, col2, col3 = st.columns([5,2,1])
+            col1.write(f"{item['nom']} x {item['qte']}")
+            col2.write(f"{int(sous_total)} F")
+            if col3.button("❌", key=f"del_{i}"):
+                st.session_state.cart.pop(i)
+                st.rerun()
+
+        st.subheader(f"Total : {int(total)} FCFA")
+
+        service = st.radio("Mode", ["Sur place", "Livraison"], horizontal=True)
+
+        if service == "Sur place":
+            logistique = st.text_input("Numéro de table")
         else:
-            # Sauvegarde SQL
-            conn = init_db()
-            conn.execute("INSERT INTO commandes (client_nom, telephone, articles_json, total_prix, date_commande) VALUES (?,?,?,?,?)",
-                         (nom, tel, json.dumps(st.session_state.panier), total_commande, datetime.now().strftime("%H:%M")))
-            conn.commit()
-            
-            # WhatsApp
-            msg = f"*Commande de {nom}*\nTotal: {total_commande} FCFA"
-            wa_link = f"https://wa.me/22177XXXXXXX?text={urllib.parse.quote(msg)}"
-            
-            st.success("✅ Commande enregistrée !")
-            st.link_button("📲 Envoyer sur WhatsApp", wa_link, use_container_width=True)
+            tel = st.text_input("Téléphone")
+            adr = st.text_input("Adresse")
+            if not tel.isdigit() or len(tel) < 9:
+                st.warning("Numéro invalide")
+            logistique = f"📞 {tel} | 📍 {adr}"
 
-# Bouton de gestion discret en bas à droite
-st.markdown("---")
-st.button("🔍 Gérer l'application", type="secondary")
+        if st.button("🚀 Valider la commande"):
+            if not logistique:
+                st.warning("Informations manquantes")
+            else:
+                articles_json = json.dumps(st.session_state.cart, ensure_ascii=False)
+                c.execute("INSERT INTO commandes (articles, total, type_commande, detail_logistique) VALUES (?,?,?,?)",
+                          (articles_json, total, service, logistique))
+                conn.commit()
 
+                txt = ""
+                for item in st.session_state.cart:
+                    txt += f"- {item['nom']} x {item['qte']}%0A"
+
+                msg = f"Nouvelle commande:%0A{txt}%0ATotal: {int(total)} F%0AMode: {service}%0AInfos: {logistique}"
+                msg = urllib.parse.quote(msg)
+
+                num = "221XXXXXXXXX"
+                st.session_state.wa_link = f"https://wa.me/{num}?text={msg}"
+
+                st.session_state.cart = []
+                st.session_state.cmd_faite = True
+                st.rerun()
+
+        st.markdown('</div>', unsafe_allow_html=True)
+
+    if st.session_state.cmd_faite:
+        st.success("Commande prête !")
+        st.balloons()
+        st.markdown(f"""
+        <a href="{st.session_state.wa_link}" target="_blank">
+        <div style="background:#25D366;color:white;padding:20px;text-align:center;border-radius:15px;">
+        📲 Envoyer sur WhatsApp
+        </div></a>
+        """, unsafe_allow_html=True)
+
+# --- 7. ESPACE GÉRANT ---
+elif choice == "📊 Espace Gérant":
+    st.title("🛡️ Administration")
+
+    t1, t2 = st.tabs(["📋 Commandes", "🥘 Carte"])
+
+    with t1:
+        cmds = pd.read_sql("SELECT * FROM commandes ORDER BY date DESC", conn)
+        for _, r in cmds.iterrows():
+            with st.expander(f"Commande #{r['id']} - {int(r['total'])} F"):
+                st.write("Infos :", r["detail_logistique"])
+                st.write("Articles :", r["articles"])
+                if st.button("✔️ Terminer", key=f"done_{r['id']}"):
+                    c.execute("DELETE FROM commandes WHERE id=?", (r["id"],))
+                    conn.commit()
+                    st.rerun()
+
+    with t2:
+        with st.form("ajout"):
+            st.subheader("Ajouter un plat")
+            n = st.text_input("Nom")
+            p = st.number_input("Prix", 0)
+            i = st.text_input("Image URL")
+            d = st.text_area("Description")
+            if st.form_submit_button("Ajouter"):
+                c.execute("INSERT INTO menu (nom, prix, desc, img) VALUES (?,?,?,?)", (n,p,d,i))
+                conn.commit()
+                st.success("Ajouté")
+                st.rerun()
+
+        plats = pd.read_sql("SELECT * FROM menu", conn)
+        for _, r in plats.iterrows():
+            col1, col2 = st.columns([4,1])
+            col1.write(f"{r['nom']} - {int(r['prix'])} F")
+            if col2.button("Supprimer", key=f"del_{r['id']}"):
+                c.execute("DELETE FROM menu WHERE id=?", (r["id"],))
+                conn.commit()
+                st.rerun()
