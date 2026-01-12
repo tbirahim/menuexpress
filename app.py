@@ -12,7 +12,7 @@ if "PASSWORD" not in st.secrets:
     st.error("Erreur : Mot de passe non configuré dans les secrets.")
     st.stop()
 
-# --- 2. STYLE CSS (LISIBILITÉ MAXIMALE) ---
+# --- 2. STYLE CSS (DORÉ À GAUCHE / SANS EFFETS) ---
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
@@ -26,11 +26,11 @@ st.markdown("""
     background-attachment: fixed;
 }
 
-/* SIDEBAR : BLANC PUR SANS DORÉ */
+/* --- PARTIE GAUCHE (SIDEBAR) EN DORÉ SANS EFFET --- */
 [data-testid="stSidebar"] * {
-    color: #FFFFFF !important;
+    color: #D4AF37 !important;
     font-weight: 700 !important;
-    text-shadow: 2px 2px 4px #000000;
+    text-shadow: none !important; /* Suppression des effets */
 }
 
 /* CARTES DES PLATS */
@@ -44,18 +44,19 @@ st.markdown("""
     align-items: center;
 }
 
-/* LISIBILITÉ TOTALE : TEXTE BLANC + OMBRE NOIRE ÉPAISSE */
+/* TEXTES DE DROITE EN BLANC SANS EFFET */
 h1, h2, h3, p, label, span, .stMarkdown {
     color: #FFFFFF !important;
-    text-shadow: 2px 2px 5px #000000, -1px -1px 0 #000000, 1px -1px 0 #000000;
+    text-shadow: none !important; /* Suppression des effets */
 }
 
-/* PRIX EN VERT FLUO */
+/* PRIX EN VERT */
 .prix-vert {
     color: #00FF66 !important;
     font-size: 2rem;
     font-weight: bold;
     margin-left: auto;
+    text-shadow: none !important;
 }
 
 /* BOUTONS */
@@ -64,6 +65,7 @@ h1, h2, h3, p, label, span, .stMarkdown {
     color: #000000 !important;
     font-weight: 900;
     border-radius: 10px;
+    border: none !important;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -81,7 +83,7 @@ def init_db():
         articles TEXT, total REAL, type_commande TEXT, 
         telephone TEXT, adresse TEXT, table_num TEXT, date DATETIME DEFAULT CURRENT_TIMESTAMP)""")
     
-    # Correction automatique des colonnes pour éviter le KeyError
+    # Correction automatique des colonnes
     cursor = conn.execute('PRAGMA table_info(commandes)')
     cols = [col[1] for col in cursor.fetchall()]
     for field in ['telephone', 'adresse', 'table_num']:
@@ -113,7 +115,7 @@ with st.sidebar:
             st.session_state.admin_ok = False
             st.rerun()
 
-# --- 5. PAGE CLIENT (COMMANDER) ---
+# --- 5. PAGE CLIENT ---
 if choice == "🍽️ Commander":
     st.markdown("<h1 style='text-align: center;'>👨‍🍳 Notre Carte</h1>", unsafe_allow_html=True)
     
@@ -133,91 +135,60 @@ if choice == "🍽️ Commander":
 
         col1, col2 = st.columns([1, 4])
         qte = col1.number_input("Qté", 1, 10, 1, key=f"q_{row['id']}")
-        if col2.button(f"Ajouter {row['nom']} au panier", key=f"btn_{row['id']}", use_container_width=True):
+        if col2.button(f"Ajouter {row['nom']}", key=f"btn_{row['id']}", use_container_width=True):
             st.session_state.cart.append({"nom": row["nom"], "prix": row["prix"], "qte": qte})
             st.toast(f"✅ {row['nom']} ajouté !")
 
-    # --- PANIER ---
     if st.session_state.cart:
         st.markdown("<br><hr>", unsafe_allow_html=True)
-        st.markdown("## 🛒 Votre Panier")
+        st.markdown("## 🛒 Panier")
         total_cmd = sum(item['prix'] * item['qte'] for item in st.session_state.cart)
-        
-        for item in st.session_state.cart:
-            st.write(f"• **{item['nom']}** x{item['qte']} : {int(item['prix']*item['qte'])} F")
-        
         st.markdown(f"### TOTAL : <span style='color:#00FF66'>{int(total_cmd)} FCFA</span>", unsafe_allow_html=True)
         
-        mode = st.radio("Comment voulez-vous recevoir votre commande ?", ["Sur place", "Livraison"], horizontal=True)
-        
+        mode = st.radio("Réception", ["Sur place", "Livraison"], horizontal=True)
         t_num, tel, adr = "", "", ""
         if mode == "Sur place":
-            t_num = st.text_input("Numéro de Table ou Nom")
+            t_num = st.text_input("N° de Table")
         else:
             c1, c2 = st.columns(2)
-            tel = c1.text_input("📞 Numéro de Téléphone")
-            adr = c2.text_input("📍 Adresse de Livraison")
+            tel = c1.text_input("📞 Téléphone")
+            adr = c2.text_input("📍 Adresse")
 
-        if st.button("✅ CONFIRMER ET ENVOYER LA COMMANDE", use_container_width=True):
+        if st.button("✅ VALIDER LA COMMANDE", use_container_width=True):
             if (mode == "Sur place" and not t_num) or (mode == "Livraison" and (not tel or not adr)):
-                st.error("Veuillez remplir les informations de contact.")
+                st.error("Champs requis manquants.")
             else:
                 c.execute("INSERT INTO commandes (articles, total, type_commande, telephone, adresse, table_num) VALUES (?,?,?,?,?,?)",
                           (json.dumps(st.session_state.cart, ensure_ascii=False), total_cmd, mode, tel, adr, t_num))
                 conn.commit()
-                
-                # WhatsApp
-                msg = f"*COMMANDE ({mode})*\n"
-                for it in st.session_state.cart: msg += f"- {it['nom']} x{it['qte']}\n"
-                msg += f"\n💰 *TOTAL : {int(total_cmd)} F*"
-                info = f"\n📍 Table: {t_num}" if mode == "Sur place" else f"\n📞 Tel: {tel}\n📍 Adresse: {adr}"
-                
-                wa_url = f"https://wa.me/221777743766?text={urllib.parse.quote(msg + info)}"
-                st.session_state.cart = []
                 st.success("Commande enregistrée !")
-                st.link_button("📲 Envoyer sur WhatsApp", wa_url, use_container_width=True)
+                st.session_state.cart = []
 
-# --- 6. ESPACE GÉRANT (DATABASE) ---
+# --- 6. ESPACE GÉRANT ---
 elif choice == "📊 Espace Gérant":
     st.markdown("<h1>📊 Administration</h1>", unsafe_allow_html=True)
-    t_cmd, t_menu = st.tabs(["📋 Liste des Commandes", "🥘 Gérer la Carte"])
+    t_cmd, t_menu = st.tabs(["📋 Commandes", "🥘 Menu"])
 
     with t_cmd:
         cmds = pd.read_sql("SELECT * FROM commandes ORDER BY date DESC", conn)
         for _, r in cmds.iterrows():
-            with st.expander(f"📦 Commande #{r['id']} - {r['type_commande']} ({int(r['total'])} F)"):
+            with st.expander(f"📦 Commande #{r['id']} - {r['type_commande']}"):
                 st.write(f"**Client :** {r['table_num'] if r['table_num'] else r['telephone']}")
                 if r['adresse']: st.write(f"**Lieu :** {r['adresse']}")
                 st.table(pd.DataFrame(json.loads(r['articles'])))
-                if st.button("✔️ Archiver / Terminer", key=f"fin_{r['id']}"):
+                if st.button("Terminer", key=f"fin_{r['id']}"):
                     c.execute("DELETE FROM commandes WHERE id=?", (r['id'],))
                     conn.commit()
                     st.rerun()
 
     with t_menu:
-        st.subheader("🛠️ Ajouter un plat")
-        with st.form("new_plat"):
-            n = st.text_input("Nom du plat")
+        st.subheader("Ajouter un plat")
+        with st.form("new"):
+            n = st.text_input("Nom")
             p = st.number_input("Prix", 0)
             d = st.text_area("Description")
-            i = st.text_input("URL de l'image")
-            if st.form_submit_button("Ajouter à la carte"):
+            i = st.text_input("URL Image")
+            if st.form_submit_button("Ajouter"):
                 c.execute("INSERT INTO menu (nom, prix, desc, img) VALUES (?,?,?,?)", (n,p,d,i))
-                conn.commit()
-                st.rerun()
-        
-        st.divider()
-        st.subheader("📋 État du Menu")
-        plats_edit = pd.read_sql("SELECT * FROM menu", conn)
-        for _, row in plats_edit.iterrows():
-            c1, c2, c3 = st.columns([3, 2, 1])
-            c1.write(f"**{row['nom']}**")
-            label = "✅ En Stock" if row['disponible'] else "❌ Rupture"
-            if c2.button(label, key=f"stk_{row['id']}"):
-                c.execute("UPDATE menu SET disponible=? WHERE id=?", (0 if row['disponible'] else 1, row['id']))
-                conn.commit()
-                st.rerun()
-            if c3.button("🗑️", key=f"del_{row['id']}"):
-                c.execute("DELETE FROM menu WHERE id=?", (row['id'],))
                 conn.commit()
                 st.rerun()
