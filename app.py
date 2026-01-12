@@ -9,7 +9,6 @@ from datetime import datetime
 # --- 1. CONFIGURATION ---
 st.set_page_config(page_title="Menu Express PRO", page_icon="🥘", layout="wide")
 
-# Vérification du mot de passe dans les secrets
 if "PASSWORD" not in st.secrets:
     st.error("Le mot de passe admin n'est pas configuré dans les secrets Streamlit.")
     st.stop()
@@ -30,11 +29,26 @@ st.markdown("""
     background-attachment: fixed;
 }
 
+/* --- MODIFICATION : DORÉ POUR LA PARTIE GAUCHE (SIDEBAR) --- */
+[data-testid="stSidebar"] h1, 
+[data-testid="stSidebar"] label, 
+[data-testid="stSidebar"] p,
+[data-testid="stSidebar"] .stMarkdown p {
+    color: #D4AF37 !important; /* Couleur Dorée */
+    font-weight: bold !important;
+    text-shadow: 1px 1px 2px black;
+}
+
+/* Couleur des options radio dans la sidebar */
+[data-testid="stSidebar"] .st-bd {
+    color: #D4AF37 !important;
+}
+
 /* Cartes des plats - Contraste élevé */
 .plat-card {
     padding: 25px;
     border-radius: 20px;
-    background-color: rgba(0, 0, 0, 0.85); /* Fond très sombre pour lire facilement */
+    background-color: rgba(0, 0, 0, 0.85); 
     border: 2px solid rgba(255, 255, 255, 0.1);
     margin-bottom: 15px;
     display: flex;
@@ -42,14 +56,14 @@ st.markdown("""
     color: #FFFFFF !important;
 }
 
-/* Forcer la couleur blanche sur TOUS les textes pour la lisibilité */
-h1, h2, h3, p, span, label, .stMarkdown {
+/* Forcer la couleur blanche sur les textes de droite */
+h1, h2, h3, p, span, .stMarkdown {
     color: #FFFFFF !important;
     text-shadow: 1px 1px 2px black;
 }
 
 .prix {
-    color: #25D366 !important; /* Vert WhatsApp pour le prix */
+    color: #25D366 !important; 
     font-size: 1.8rem;
     font-weight: bold;
     margin-left: auto;
@@ -61,13 +75,6 @@ h1, h2, h3, p, span, label, .stMarkdown {
     border-radius: 20px;
     border: 3px solid #25D366;
     color: white;
-}
-
-/* Style pour les statistiques */
-.stMetric {
-    background-color: rgba(255,255,255,0.1);
-    padding: 15px;
-    border-radius: 10px;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -114,7 +121,6 @@ with st.sidebar:
 if choice == "🍽️ Commander":
     st.markdown("# 👨‍🍳 Notre Carte")
     
-    # Récupération des plats
     plats = pd.read_sql("SELECT * FROM menu", conn)
     
     for _, row in plats.iterrows():
@@ -160,12 +166,10 @@ if choice == "🍽️ Commander":
             if not infos:
                 st.error("Précisez votre table ou adresse.")
             else:
-                # Sauvegarde SQL
                 c.execute("INSERT INTO commandes (articles, total, type_commande, detail_logistique) VALUES (?,?,?,?)",
                           (json.dumps(st.session_state.cart, ensure_ascii=False), total_cmd, mode, infos))
                 conn.commit()
                 
-                # WhatsApp
                 msg = f"*NOUVELLE COMMANDE*\nItems: {len(st.session_state.cart)}\nTotal: {int(total_cmd)} F\nInfos: {infos}"
                 wa_url = f"https://wa.me/221777743766?text={urllib.parse.quote(msg)}"
                 
@@ -181,7 +185,6 @@ elif choice == "📊 Espace Gérant":
     t_cmd, t_carte, t_stats = st.tabs(["📋 Commandes", "🥘 Ma Carte", "📈 Statistiques"])
 
     with t_cmd:
-        st.subheader("Commandes en cours")
         cmds = pd.read_sql("SELECT * FROM commandes ORDER BY date DESC", conn)
         for _, r in cmds.iterrows():
             with st.expander(f"📦 Commande #{r['id']} - {int(r['total'])} F"):
@@ -211,7 +214,6 @@ elif choice == "📊 Espace Gérant":
             col1, col2, col3 = st.columns([3, 2, 1])
             col1.write(f"**{mi['nom']}**")
             
-            # Bouton de disponibilité
             btn_txt = "✅ En Stock" if mi['disponible'] else "❌ Rupture"
             if col2.button(btn_txt, key=f"stock_{mi['id']}"):
                 new_val = 0 if mi['disponible'] else 1
@@ -225,21 +227,15 @@ elif choice == "📊 Espace Gérant":
                 st.rerun()
 
     with t_stats:
-        st.subheader("📈 Performances du Restaurant")
+        st.subheader("📈 Performances")
         df_ventes = pd.read_sql("SELECT articles, total FROM commandes", conn)
-        
         if not df_ventes.empty:
             st.metric("Chiffre d'affaires (en cours)", f"{int(df_ventes['total'].sum())} FCFA")
-            
-            # Analyse des plats
             all_ordered = []
             for row in df_ventes['articles']:
                 all_ordered.extend(json.loads(row))
-            
             stats_df = pd.DataFrame(all_ordered)
             top_plats = stats_df.groupby('nom')['qte'].sum().sort_values(ascending=False)
-            
-            st.write("### Plats les plus populaires")
             st.bar_chart(top_plats)
         else:
-            st.info("Aucune commande enregistrée pour générer des statistiques.")
+            st.info("Aucune donnée.")
