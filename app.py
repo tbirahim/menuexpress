@@ -128,7 +128,7 @@ elif choice == "🛒 Mon Panier":
                 conn.commit()
                 
                 # 2. Préparation WhatsApp (Formatage Ultra-Robuste)
-                num_gerante = "22177XXXXXXX" # <--- METS TON NUMÉRO ICI SANS LE +
+                num_gerante = "221777743766" # <--- METS TON NUMÉRO ICI SANS LE +
                 msg_brut = f"Bonjour ! Nouvelle commande :\n{txt_items}\n*Total :* {int(total)} FCFA\n*Mode :* {service}\n*Infos :* {infos}"
                 msg_final = urllib.parse.quote(msg_brut)
                 st.session_state.wa_link = f"https://api.whatsapp.com/send?phone={num_gerante}&text={msg_final}"
@@ -196,4 +196,5 @@ elif choice == "📊 Commandes Reçues":
                 c.execute('DELETE FROM commandes WHERE id=?', (row['id'],))
                 conn.commit()
                 st.rerun()
+
 
