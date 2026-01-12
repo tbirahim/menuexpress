@@ -122,13 +122,23 @@ elif choice == "🛒 Mon Panier":
         if st.button("🚀 1. Valider la commande"):
             if not infos:
                 st.error("Veuillez remplir les infos de table ou livraison.")
+            elif not st.session_state.cart:
+                st.warning("Votre panier est déjà vide ou la commande a été envoyée.")
             else:
+                # On enregistre en base de données
                 c.execute('INSERT INTO commandes (articles, total, type_commande, detail_logistique) VALUES (?,?,?,?)',
                           (str(st.session_state.cart), total, service, infos))
                 conn.commit()
+                
+                # LA SÉCURITÉ : On vide le panier IMMÉDIATEMENT
+                # On garde une copie pour WhatsApp avant d'effacer
+                st.session_state.dernier_recap = txt_wa 
+                st.session_state.dernier_total = total
+                st.session_state.cart = [] 
+                
                 st.session_state.commande_validee = True
-                st.success("Commande enregistrée ! Cliquez ci-dessous pour prévenir la gérante.")
-
+                st.success("✅ Commande enregistrée avec succès !")
+                st.rerun() # On rafraîchit pour faire disparaître le panier
         if st.session_state.commande_validee:
             # CONFIGURATION WHATSAPP
             num_gerante = "221777743766" # <--- METS TON NUMÉRO ICI
@@ -189,3 +199,4 @@ elif choice == "📊 Commandes Reçues":
                 c.execute('DELETE FROM commandes WHERE id=?', (row['id'],))
                 conn.commit()
                 st.rerun()
+
