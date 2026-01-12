@@ -163,7 +163,7 @@ if choice == "🍽️ Commander":
                 txt += f"\n💰 *TOTAL : {int(total_cmd)} F*"
                 info_wa = f"\n📍 Table: {t_num}" if mode == "Sur place" else f"\n📞 Tel: {tel}\n📍 Adresse: {adr}"
                 
-                wa_url = f"https://wa.me/22177XXXXXXX?text={urllib.parse.quote(txt + info_wa)}"
+                wa_url = f"https://wa.me/221777743766?text={urllib.parse.quote(txt + info_wa)}"
                 st.success("Commande enregistrée !")
                 st.link_button("📲 Envoyer sur WhatsApp", wa_url, use_container_width=True)
                 st.session_state.cart = []
@@ -212,3 +212,4 @@ elif choice == "📊 Espace Gérant":
                 c.execute("DELETE FROM menu WHERE id=?", (row['id'],))
                 conn.commit()
                 st.rerun()
+
