@@ -1,6 +1,7 @@
 import streamlit as st
 import sqlite3
 import pandas as pd
+import urllib.parse
 
 # --- 1. CONFIGURATION ---
 st.set_page_config(page_title="Menu Express PRO", page_icon="🍴", layout="wide")
@@ -17,15 +18,19 @@ st.markdown("""
         background-color: rgba(0, 0, 0, 0.8); z-index: -1;
     }
     .plat-card {
-        padding: 20px; border-radius: 15px; background-color: rgba(30, 30, 30, 0.9);
-        border: 1px solid #d4af37; margin-bottom: 20px; display: flex; align-items: center;
+        padding: 15px; border-radius: 12px; background-color: rgba(30, 30, 30, 0.9);
+        border: 1px solid #d4af37; margin-bottom: 15px; display: flex; align-items: center;
     }
     .plat-image {
-        width: 110px; height: 110px; border-radius: 10px;
-        object-fit: cover; margin-right: 20px; border: 1px solid #d4af37;
+        width: 90px; height: 90px; border-radius: 8px;
+        object-fit: cover; margin-right: 15px; border: 1px solid #d4af37;
     }
     h1, h2, h3 { color: #d4af37 !important; }
-    .prix { color: #d4af37; font-weight: bold; font-size: 1.4rem; margin-left: auto; }
+    .prix { color: #d4af37; font-weight: bold; font-size: 1.2rem; margin-left: auto; }
+    .cart-section {
+        background-color: rgba(0, 0, 0, 0.9); padding: 20px; border-radius: 15px;
+        border: 2px solid #25D366; margin-top: 30px;
+    }
     </style>
     """, unsafe_allow_html=True)
 
@@ -36,8 +41,7 @@ def init_db():
     c.execute('CREATE TABLE IF NOT EXISTS menu (id INTEGER PRIMARY KEY AUTOINCREMENT, nom TEXT, prix REAL, desc TEXT, img TEXT)')
     c.execute('''CREATE TABLE IF NOT EXISTS commandes 
                  (id INTEGER PRIMARY KEY AUTOINCREMENT, articles TEXT, total REAL, 
-                  type_commande TEXT, detail_logistique TEXT, statut TEXT DEFAULT 'En attente', 
-                  date DATETIME DEFAULT CURRENT_TIMESTAMP)''')
+                  type_commande TEXT, detail_logistique TEXT, date DATETIME DEFAULT CURRENT_TIMESTAMP)''')
     conn.commit()
     return conn
 
@@ -53,9 +57,9 @@ if 'wa_link' not in st.session_state: st.session_state.wa_link = ""
 # --- 5. BARRE LATÉRALE ---
 with st.sidebar:
     st.title("⚜️ Menu Express")
-    pages = ["🍽️ Menu Client", "🛒 Mon Panier"]
+    pages = ["🍽️ Commander", "📊 Commandes Reçues"] if st.session_state.admin_ok else ["🍽️ Commander"]
     if st.session_state.admin_ok:
-        pages.extend(["👩‍💼 Gérante (Admin)", "📊 Commandes Reçues"])
+        pages.append("👩‍💼 Gérante (Admin)")
     
     choice = st.radio("Navigation", pages)
     
@@ -72,70 +76,81 @@ with st.sidebar:
             st.session_state.admin_ok = False
             st.rerun()
 
-# --- 6. PAGES ---
-
-if choice == "🍽️ Menu Client":
+# --- 6. PAGE PRINCIPALE : COMMANDER ---
+if choice == "🍽️ Commander":
     st.header("🍴 Notre Carte")
+    
+    # AFFICHAGE DU MENU
     df = pd.read_sql('SELECT * FROM menu', conn)
     if df.empty:
         st.info("La carte est vide.")
     else:
         for _, row in df.iterrows():
             img = row['img'] if row['img'] else "https://via.placeholder.com/150"
-            st.markdown(f'<div class="plat-card"><img src="{img}" class="plat-image"><div><h3>{row["nom"]}</h3><p>{row["desc"]}</p></div><span class="prix">{int(row["prix"])} FCFA</span></div>', unsafe_allow_html=True)
-            if st.button(f"Ajouter au panier", key=f"add_{row['id']}"):
+            st.markdown(f'<div class="plat-card"><img src="{img}" class="plat-image"><div><h3>{row["nom"]}</h3><p style="font-size:0.9rem;">{row["desc"]}</p></div><span class="prix">{int(row["prix"])} F</span></div>', unsafe_allow_html=True)
+            if st.button(f"Ajouter {row['nom']}", key=f"add_{row['id']}"):
                 st.session_state.cart.append({"nom": row['nom'], "prix": row['prix']})
                 st.toast(f"✅ {row['nom']} ajouté !")
 
-elif choice == "🛒 Mon Panier":
-    st.header("🛍️ Votre Panier")
+    st.write("---")
+    
+    # SECTION PANIER (EN BAS DU MENU)
+    st.header("🛒 Ma Commande")
     
     if st.session_state.cmd_faite:
-        st.success("✅ Commande enregistrée avec succès !")
+        st.success("✅ Commande enregistrée !")
         st.markdown(f"""
             <a href="{st.session_state.wa_link}" target="_blank" style="text-decoration:none;">
-                <div style="background-color:#25D366; color:white; padding:20px; text-align:center; border-radius:10px; font-weight:bold; font-size:1.3rem; margin:20px 0; border: 2px solid white;">
-                    🟢 DERNIÈRE ÉTAPE : ENVOYER SUR WHATSAPP
+                <div style="background-color:#25D366; color:white; padding:20px; text-align:center; border-radius:10px; font-weight:bold; font-size:1.3rem; border: 2px solid white;">
+                    🟢 ENVOYER SUR WHATSAPP
                 </div>
             </a>
         """, unsafe_allow_html=True)
-        if st.button("🔄 Faire une autre commande"):
+        if st.button("🔄 Nouvelle commande"):
             st.session_state.cmd_faite = False
+            st.session_state.cart = []
             st.rerun()
 
     elif not st.session_state.cart:
-        st.write("Votre panier est vide.")
+        st.write("Votre panier est vide. Cliquez sur 'Ajouter' au-dessus.")
     
     else:
-        total = sum(i['prix'] for i in st.session_state.cart)
-        txt_items = ""
-        for i in st.session_state.cart:
-            st.write(f"- {i['nom']} : {int(i['prix'])} FCFA")
-            txt_items += f"- {i['nom']}%0A"
-        
-        st.divider()
-        service = st.radio("Mode de service", ["Sur place", "Livraison"])
-        infos = st.text_input("N° de Table" if service == "Sur place" else "Téléphone et Adresse")
-        
-        if st.button("🚀 VALIDER LA COMMANDE"):
-            if not infos:
-                st.error("Veuillez remplir les informations !")
-            else:
-                c.execute('INSERT INTO commandes (articles, total, type_commande, detail_logistique) VALUES (?,?,?,?)',
-                          (str(st.session_state.cart), total, service, infos))
-                conn.commit()
-                
-                # PREPARATION LIEN WHATSAPP
-                num_gerante = "221777743766" # <--- METS TON NUMÉRO ICI (ex: 221771234567)
-                msg = f"Bonjour ! Nouvelle commande :%0A{txt_items}%0A*Total :* {int(total)} FCFA%0A*Mode :* {service}%0A*Infos :* {infos}"
-                st.session_state.wa_link = f"https://wa.me/{num_gerante}?text={msg}"
-                
-                st.session_state.cart = []
-                st.session_state.cmd_faite = True
-                st.rerun()
+        with st.container():
+            st.markdown('<div class="cart-section">', unsafe_allow_html=True)
+            total = sum(i['prix'] for i in st.session_state.cart)
+            txt_items = ""
+            for i in st.session_state.cart:
+                st.write(f"▪️ {i['nom']} : {int(i['prix'])} FCFA")
+                txt_items += f"- {i['nom']}%0A"
+            
+            st.subheader(f"Total : {int(total)} FCFA")
+            
+            col_a, col_b = st.columns(2)
+            with col_a:
+                service = st.radio("Mode", ["Sur place", "Livraison"])
+            with col_b:
+                infos = st.text_input("N° Table ou Adresse/Tel")
+            
+            if st.button("🚀 VALIDER LA COMMANDE"):
+                if not infos:
+                    st.error("Précisez la table ou l'adresse !")
+                else:
+                    c.execute('INSERT INTO commandes (articles, total, type_commande, detail_logistique) VALUES (?,?,?,?)',
+                              (str(st.session_state.cart), total, service, infos))
+                    conn.commit()
+                    
+                    num_gerante = "221777743766" # <--- METS TON NUMÉRO ICI
+                    msg = f"Nouvelle commande :%0A{txt_items}%0A*Total :* {int(total)} FCFA%0A*Mode :* {service}%0A*Infos :* {infos}"
+                    st.session_state.wa_link = f"https://wa.me/{num_gerante}?text={msg}"
+                    
+                    st.session_state.cart = []
+                    st.session_state.cmd_faite = True
+                    st.rerun()
+            st.markdown('</div>', unsafe_allow_html=True)
 
+# --- 7. PAGES ADMIN ---
 elif choice == "👩‍💼 Gérante (Admin)":
-    st.header("⚙️ Gestion")
+    st.header("⚙️ Gestion de la Carte")
     with st.form("add_p"):
         n, p, i, d = st.text_input("Nom"), st.number_input("Prix", 0), st.text_input("URL Image"), st.text_area("Description")
         if st.form_submit_button("Ajouter"):
