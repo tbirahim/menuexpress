@@ -91,8 +91,18 @@ elif choice == "🛒 Mon Panier":
     st.header("🛍️ Votre Panier")
     if not st.session_state.cart:
         if st.session_state.cmd_faite:
-            st.success("✅ Commande envoyée ! Redirection WhatsApp en cours...")
-            if st.button("🔄 Nouvelle commande"):
+            st.success("✅ Commande enregistrée !")
+            # BOUTON DE SECOURS AU CAS OÙ LE LIEN NE S'OUVRE PAS TOUT SEUL
+            if 'wa_link' in st.session_state:
+                st.markdown(f"""
+                    <a href="{st.session_state.wa_link}" target="_blank" style="text-decoration:none;">
+                        <div style="background-color:#25D366; color:white; padding:15px; text-align:center; border-radius:10px; font-weight:bold; font-size:1.2rem; margin:20px 0;">
+                            📲 CLIQUER ICI POUR ENVOYER SUR WHATSAPP
+                        </div>
+                    </a>
+                """, unsafe_allow_html=True)
+            
+            if st.button("🔄 Faire une nouvelle commande"):
                 st.session_state.cmd_faite = False
                 st.rerun()
         else:
@@ -116,6 +126,20 @@ elif choice == "🛒 Mon Panier":
                 c.execute('INSERT INTO commandes (articles, total, type_commande, detail_logistique) VALUES (?,?,?,?)',
                           (str(st.session_state.cart), total, service, infos))
                 conn.commit()
+                
+                # 2. Préparation WhatsApp (Formatage Ultra-Robuste)
+                num_gerante = "22177XXXXXXX" # <--- METS TON NUMÉRO ICI SANS LE +
+                msg_brut = f"Bonjour ! Nouvelle commande :\n{txt_items}\n*Total :* {int(total)} FCFA\n*Mode :* {service}\n*Infos :* {infos}"
+                msg_final = urllib.parse.quote(msg_brut)
+                st.session_state.wa_link = f"https://api.whatsapp.com/send?phone={num_gerante}&text={msg_final}"
+                
+                # 3. Nettoyage Session
+                st.session_state.cart = []
+                st.session_state.cmd_faite = True
+                
+                # 4. Tentative de redirection automatique
+                st.markdown(f'<meta http-equiv="refresh" content="0; url={st.session_state.wa_link}">', unsafe_allow_html=True)
+                st.rerun()
                 
                 # 2. Préparation WhatsApp
                 num_gerante = "221777743766" # <--- METS TON NUMÉRO ICI
@@ -172,3 +196,4 @@ elif choice == "📊 Commandes Reçues":
                 c.execute('DELETE FROM commandes WHERE id=?', (row['id'],))
                 conn.commit()
                 st.rerun()
+
