@@ -121,7 +121,7 @@ elif choice == "🛒 Mon Panier":
                 conn.commit()
                 
                 # 2. Prépare WhatsApp
-                num_gerante = "221XXXXXXXXX" # <--- METS TON NUMÉRO ICI
+                num_gerante = "221778615900" # <--- METS TON NUMÉRO ICI
                 msg = f"Nouvelle Commande!{txt_items}%0A%0A*Total:* {int(total)} FCFA%0A*Mode:* {service}%0A*Infos:* {infos}"
                 link = f"https://wa.me/{num_gerante}?text={msg}"
                 
