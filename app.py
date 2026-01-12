@@ -1,11 +1,16 @@
 import streamlit as st
 import sqlite3
 import pandas as pd
+import time
 
 # --- 1. CONFIGURATION ---
 st.set_page_config(page_title="Menu Express PRO", page_icon="🍴", layout="wide")
 
-# --- 2. DESIGN & STYLE ---
+# Rafraîchissement automatique toutes les 60 secondes pour la gérante
+if "last_refresh" not in st.session_state:
+    st.session_state.last_refresh = time.time()
+
+# --- 2. DESIGN ---
 st.markdown("""
     <style>
     .stApp {
@@ -44,11 +49,10 @@ def init_db():
 conn = init_db()
 c = conn.cursor()
 
-# --- 4. SESSION STATE (Connexion unique) ---
-if 'admin_ok' not in st.session_state:
-    st.session_state.admin_ok = False
-if 'commande_validee' not in st.session_state:
-    st.session_state.commande_validee = False
+# --- 4. SESSION STATE ---
+if 'admin_ok' not in st.session_state: st.session_state.admin_ok = False
+if 'cart' not in st.session_state: st.session_state.cart = []
+if 'commande_validee' not in st.session_state: st.session_state.commande_validee = False
 
 # --- 5. BARRE LATÉRALE ---
 with st.sidebar:
@@ -59,144 +63,107 @@ with st.sidebar:
     
     choice = st.radio("Navigation", pages)
     
-    st.divider()
-    if not st.session_state.admin_ok:
-        with st.expander("🔐 Accès Gérante"):
-            p_admin = st.text_input("Code secret", type="password")
-            if st.button("Connexion"):
-                if p_admin == "admin123":
-                    st.session_state.admin_ok = True
-                    st.rerun()
-                else:
-                    st.error("Code incorrect")
-    else:
-        if st.button("🔴 Se déconnecter"):
+    if st.session_state.admin_ok:
+        st.write("---")
+        if st.button("🔴 Déconnexion"):
             st.session_state.admin_ok = False
             st.rerun()
+    else:
+        with st.expander("🔐 Admin"):
+            pwd = st.text_input("Code", type="password")
+            if st.button("OK"):
+                if pwd == "admin123":
+                    st.session_state.admin_ok = True
+                    st.rerun()
 
-# --- 6. LOGIQUE DES PAGES ---
+# --- 6. PAGES ---
 
 if choice == "🍽️ Menu Client":
     st.header("🍴 Notre Carte")
     df = pd.read_sql('SELECT * FROM menu', conn)
     if df.empty:
-        st.info("Le menu est vide. La gérante doit ajouter des plats.")
+        st.info("Menu vide.")
     else:
         for _, row in df.iterrows():
             img = row['img'] if row['img'] else "https://via.placeholder.com/150"
-            st.markdown(f"""
-                <div class="plat-card">
-                    <img src="{img}" class="plat-image">
-                    <div><h3>{row['nom']}</h3><p>{row['desc']}</p></div>
-                    <span class="prix">{int(row['prix'])} FCFA</span>
-                </div>
-            """, unsafe_allow_html=True)
-            if st.button(f"Ajouter au panier", key=f"add_{row['id']}"):
-                if 'cart' not in st.session_state: st.session_state.cart = []
+            st.markdown(f'<div class="plat-card"><img src="{img}" class="plat-image"><div><h3>{row["nom"]}</h3><p>{row["desc"]}</p></div><span class="prix">{int(row["prix"])} FCFA</span></div>', unsafe_allow_html=True)
+            if st.button(f"Ajouter", key=f"btn_{row['id']}"):
                 st.session_state.cart.append({"nom": row['nom'], "prix": row['prix']})
-                st.toast(f"✅ {row['nom']} ajouté !")
+                st.toast("Ajouté !")
 
 elif choice == "🛒 Mon Panier":
     st.header("🛍️ Votre Panier")
-    if 'cart' not in st.session_state or not st.session_state.cart:
-        st.write("Le panier est vide.")
+    if not st.session_state.cart:
+        if st.session_state.commande_validee:
+            st.success("✅ Commande envoyée !")
+            if st.button("Faire une autre commande"):
+                st.session_state.commande_validee = False
+                st.rerun()
+        else:
+            st.write("Le panier est vide.")
     else:
         total = sum(i['prix'] for i in st.session_state.cart)
-        txt_wa = ""
+        txt_items = ""
         for i in st.session_state.cart:
             st.write(f"- {i['nom']} : {int(i['prix'])} FCFA")
-            txt_wa += f"%0A- {i['nom']}"
+            txt_items += f"%0A- {i['nom']}"
         
-        st.divider()
-        service = st.radio("Comment voulez-vous manger ?", ["Sur place", "Livraison"])
-        infos = ""
-        if service == "Sur place":
-            infos = st.text_input("Numéro de table")
-        else:
-            tel = st.text_input("Téléphone")
-            adr = st.text_input("Adresse de livraison")
-            infos = f"Tel: {tel} | Adresse: {adr}"
-            
-        st.subheader(f"Total : {int(total)} FCFA")
+        service = st.radio("Service", ["Sur place", "Livraison"])
+        infos = st.text_input("Numéro de table" if service == "Sur place" else "Adresse et Téléphone")
         
-        if st.button("🚀 1. Valider la commande"):
+        if st.button("🚀 CONFIRMER ET PRÉVENIR PAR WHATSAPP"):
             if not infos:
-                st.error("Veuillez remplir les infos de table ou livraison.")
-            elif not st.session_state.cart:
-                st.warning("Votre panier est déjà vide ou la commande a été envoyée.")
+                st.error("Remplissez les infos !")
             else:
-                # On enregistre en base de données
+                # 1. Enregistre
                 c.execute('INSERT INTO commandes (articles, total, type_commande, detail_logistique) VALUES (?,?,?,?)',
                           (str(st.session_state.cart), total, service, infos))
                 conn.commit()
                 
-                # LA SÉCURITÉ : On vide le panier IMMÉDIATEMENT
-                # On garde une copie pour WhatsApp avant d'effacer
-                st.session_state.dernier_recap = txt_wa 
-                st.session_state.dernier_total = total
-                st.session_state.cart = [] 
+                # 2. Prépare WhatsApp
+                num_gerante = "221XXXXXXXXX" # <--- METS TON NUMÉRO ICI
+                msg = f"Nouvelle Commande!{txt_items}%0A%0A*Total:* {int(total)} FCFA%0A*Mode:* {service}%0A*Infos:* {infos}"
+                link = f"https://wa.me/{num_gerante}?text={msg}"
                 
-                st.session_state.commande_validee = True
-                st.success("✅ Commande enregistrée avec succès !")
-                st.rerun() # On rafraîchit pour faire disparaître le panier
-        if st.session_state.commande_validee:
-            # CONFIGURATION WHATSAPP
-            num_gerante = "221777743766" # <--- METS TON NUMÉRO ICI
-            msg = f"Bonjour! Nouvelle commande : {txt_wa}%0A%0A*Total:* {int(total)} FCFA%0A*Mode:* {service}%0A*Infos:* {infos}"
-            wa_link = f"https://wa.me/{num_gerante}?text={msg}"
-            
-            st.markdown(f"""
-                <a href="{wa_link}" target="_blank">
-                    <div style="background-color:#25D366; color:white; padding:15px; text-align:center; border-radius:10px; font-weight:bold; margin-top:10px;">
-                        📲 2. ENVOYER SUR WHATSAPP
-                    </div>
-                </a>
-            """, unsafe_allow_html=True)
-            
-            if st.button("🔄 Nouvelle commande"):
+                # 3. Vide le panier (Sécurité)
                 st.session_state.cart = []
-                st.session_state.commande_validee = False
+                st.session_state.commande_validee = True
+                
+                # 4. Ouvre WhatsApp et refresh
+                st.markdown(f'<meta http-equiv="refresh" content="0; url={link}">', unsafe_allow_html=True)
                 st.rerun()
 
 elif choice == "👩‍💼 Gérante (Admin)":
-    st.header("⚙️ Gestion des Plats")
-    with st.form("admin_add"):
-        n = st.text_input("Nom")
-        p = st.number_input("Prix (FCFA)", min_value=0)
-        i = st.text_input("URL Image")
-        d = st.text_area("Description")
-        if st.form_submit_button("Ajouter à la carte"):
+    st.header("⚙️ Gestion")
+    with st.form("add"):
+        n, p, i, d = st.text_input("Nom"), st.number_input("Prix", 0), st.text_input("Image URL"), st.text_area("Description")
+        if st.form_submit_button("Ajouter"):
             c.execute('INSERT INTO menu (nom, prix, desc, img) VALUES (?,?,?,?)', (n,p,d,i))
             conn.commit()
             st.rerun()
     
-    st.divider()
-    st.subheader("🗑️ Supprimer un plat")
+    st.write("---")
     items = pd.read_sql('SELECT * FROM menu', conn)
     for _, row in items.iterrows():
         col1, col2 = st.columns([4, 1])
-        col1.write(f"**{row['nom']}** ({int(row['prix'])} FCFA)")
+        col1.write(f"{row['nom']} - {int(row['prix'])} FCFA")
         if col2.button("Supprimer", key=f"del_{row['id']}"):
             c.execute('DELETE FROM menu WHERE id=?', (row['id'],))
             conn.commit()
             st.rerun()
 
 elif choice == "📊 Commandes Reçues":
-    st.header("📋 Historique des Commandes")
-    if st.button("🧹 Vider toutes les commandes"):
-        c.execute("DELETE FROM commandes")
-        conn.commit()
-        st.rerun()
-
+    st.header("📋 Commandes")
+    # Auto-refresh toutes les 30 secondes pour cette page
+    from streamlit_autorefresh import st_autorefresh
+    st_autorefresh(interval=30000, key="datarefresh")
+    
     cmds = pd.read_sql('SELECT * FROM commandes ORDER BY date DESC', conn)
     for _, row in cmds.iterrows():
-        color = "red" if row['type_commande'] == "Sur place" else "orange"
         with st.expander(f"Commande #{row['id']} - {row['type_commande']} - {int(row['total'])} FCFA"):
-            st.markdown(f":{color}[**LIEU : {row['detail_logistique']}**]")
-            st.write(f"**Plats :** {row['articles']}")
-            st.write(f"**Date :** {row['date']}")
-            if st.button("Terminer", key=f"done_{row['id']}"):
+            st.error(f"📍 INFOS : {row['detail_logistique']}")
+            st.write(f"Détails : {row['articles']}")
+            if st.button("Terminer", key=f"fin_{row['id']}"):
                 c.execute('DELETE FROM commandes WHERE id=?', (row['id'],))
                 conn.commit()
                 st.rerun()
-
