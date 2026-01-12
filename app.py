@@ -1,16 +1,12 @@
 import streamlit as st
 import sqlite3
 import pandas as pd
-import time
+import urllib.parse
 
 # --- 1. CONFIGURATION ---
 st.set_page_config(page_title="Menu Express PRO", page_icon="🍴", layout="wide")
 
-# Rafraîchissement automatique toutes les 60 secondes pour la gérante
-if "last_refresh" not in st.session_state:
-    st.session_state.last_refresh = time.time()
-
-# --- 2. DESIGN ---
+# --- 2. DESIGN LUXE ---
 st.markdown("""
     <style>
     .stApp {
@@ -49,10 +45,10 @@ def init_db():
 conn = init_db()
 c = conn.cursor()
 
-# --- 4. SESSION STATE ---
+# --- 4. GESTION DE SESSION ---
 if 'admin_ok' not in st.session_state: st.session_state.admin_ok = False
 if 'cart' not in st.session_state: st.session_state.cart = []
-if 'commande_validee' not in st.session_state: st.session_state.commande_validee = False
+if 'cmd_faite' not in st.session_state: st.session_state.cmd_faite = False
 
 # --- 5. BARRE LATÉRALE ---
 with st.sidebar:
@@ -63,18 +59,18 @@ with st.sidebar:
     
     choice = st.radio("Navigation", pages)
     
-    if st.session_state.admin_ok:
-        st.write("---")
-        if st.button("🔴 Déconnexion"):
-            st.session_state.admin_ok = False
-            st.rerun()
-    else:
+    st.write("---")
+    if not st.session_state.admin_ok:
         with st.expander("🔐 Admin"):
             pwd = st.text_input("Code", type="password")
-            if st.button("OK"):
+            if st.button("Se connecter"):
                 if pwd == "admin123":
                     st.session_state.admin_ok = True
                     st.rerun()
+    else:
+        if st.button("🔴 Déconnexion"):
+            st.session_state.admin_ok = False
+            st.rerun()
 
 # --- 6. PAGES ---
 
@@ -82,89 +78,97 @@ if choice == "🍽️ Menu Client":
     st.header("🍴 Notre Carte")
     df = pd.read_sql('SELECT * FROM menu', conn)
     if df.empty:
-        st.info("Menu vide.")
+        st.info("La carte est vide pour le moment.")
     else:
         for _, row in df.iterrows():
             img = row['img'] if row['img'] else "https://via.placeholder.com/150"
             st.markdown(f'<div class="plat-card"><img src="{img}" class="plat-image"><div><h3>{row["nom"]}</h3><p>{row["desc"]}</p></div><span class="prix">{int(row["prix"])} FCFA</span></div>', unsafe_allow_html=True)
-            if st.button(f"Ajouter", key=f"btn_{row['id']}"):
+            if st.button(f"Ajouter au panier", key=f"add_{row['id']}"):
                 st.session_state.cart.append({"nom": row['nom'], "prix": row['prix']})
-                st.toast("Ajouté !")
+                st.toast(f"✅ {row['nom']} ajouté !")
 
 elif choice == "🛒 Mon Panier":
     st.header("🛍️ Votre Panier")
     if not st.session_state.cart:
-        if st.session_state.commande_validee:
-            st.success("✅ Commande envoyée !")
-            if st.button("Faire une autre commande"):
-                st.session_state.commande_validee = False
+        if st.session_state.cmd_faite:
+            st.success("✅ Commande envoyée ! Redirection WhatsApp en cours...")
+            if st.button("🔄 Nouvelle commande"):
+                st.session_state.cmd_faite = False
                 st.rerun()
         else:
-            st.write("Le panier est vide.")
+            st.write("Votre panier est vide.")
     else:
         total = sum(i['prix'] for i in st.session_state.cart)
         txt_items = ""
         for i in st.session_state.cart:
             st.write(f"- {i['nom']} : {int(i['prix'])} FCFA")
-            txt_items += f"%0A- {i['nom']}"
+            txt_items += f"- {i['nom']}\n"
         
-        service = st.radio("Service", ["Sur place", "Livraison"])
-        infos = st.text_input("Numéro de table" if service == "Sur place" else "Adresse et Téléphone")
+        st.divider()
+        service = st.radio("Mode de service", ["Sur place", "Livraison"])
+        infos = st.text_input("N° de Table" if service == "Sur place" else "Téléphone et Adresse")
         
-        if st.button("🚀 CONFIRMER ET PRÉVENIR PAR WHATSAPP"):
+        if st.button("🚀 VALIDER LA COMMANDE"):
             if not infos:
-                st.error("Remplissez les infos !")
+                st.error("Veuillez remplir les informations !")
             else:
-                # 1. Enregistre
+                # 1. Sauvegarde Database
                 c.execute('INSERT INTO commandes (articles, total, type_commande, detail_logistique) VALUES (?,?,?,?)',
                           (str(st.session_state.cart), total, service, infos))
                 conn.commit()
                 
-                # 2. Prépare WhatsApp
+                # 2. Préparation WhatsApp
                 num_gerante = "221777743766" # <--- METS TON NUMÉRO ICI
-                msg = f"Nouvelle Commande!{txt_items}%0A%0A*Total:* {int(total)} FCFA%0A*Mode:* {service}%0A*Infos:* {infos}"
-                link = f"https://wa.me/{num_gerante}?text={msg}"
+                msg_brut = f"Bonjour ! Nouvelle commande :\n{txt_items}\n*Total :* {int(total)} FCFA\n*Mode :* {service}\n*Infos :* {infos}"
+                msg_final = urllib.parse.quote(msg_brut)
+                wa_link = f"https://wa.me/{num_gerante}?text={msg_final}"
                 
-                # 3. Vide le panier (Sécurité)
+                # 3. Nettoyage Session
                 st.session_state.cart = []
-                st.session_state.commande_validee = True
+                st.session_state.cmd_faite = True
                 
-                # 4. Ouvre WhatsApp et refresh
-                st.markdown(f'<meta http-equiv="refresh" content="0; url={link}">', unsafe_allow_html=True)
+                # 4. Redirection automatique
+                st.markdown(f'<meta http-equiv="refresh" content="0; url={wa_link}">', unsafe_allow_html=True)
                 st.rerun()
 
 elif choice == "👩‍💼 Gérante (Admin)":
-    st.header("⚙️ Gestion")
-    with st.form("add"):
-        n, p, i, d = st.text_input("Nom"), st.number_input("Prix", 0), st.text_input("Image URL"), st.text_area("Description")
-        if st.form_submit_button("Ajouter"):
+    st.header("⚙️ Gestion de la Carte")
+    with st.form("ajout_plat"):
+        n, p, i, d = st.text_input("Nom"), st.number_input("Prix", 0), st.text_input("URL Image"), st.text_area("Description")
+        if st.form_submit_button("Ajouter à la carte"):
             c.execute('INSERT INTO menu (nom, prix, desc, img) VALUES (?,?,?,?)', (n,p,d,i))
             conn.commit()
+            st.success("Plat ajouté !")
             st.rerun()
     
     st.write("---")
-    items = pd.read_sql('SELECT * FROM menu', conn)
-    for _, row in items.iterrows():
+    plats = pd.read_sql('SELECT * FROM menu', conn)
+    for _, row in plats.iterrows():
         col1, col2 = st.columns([4, 1])
-        col1.write(f"{row['nom']} - {int(row['prix'])} FCFA")
+        col1.write(f"**{row['nom']}** - {int(row['prix'])} FCFA")
         if col2.button("Supprimer", key=f"del_{row['id']}"):
             c.execute('DELETE FROM menu WHERE id=?', (row['id'],))
             conn.commit()
             st.rerun()
 
 elif choice == "📊 Commandes Reçues":
-    st.header("📋 Commandes")
-    # Auto-refresh toutes les 30 secondes pour cette page
+    st.header("📋 Suivi des Commandes")
+    # Rafraîchissement automatique (optionnel mais recommandé)
     from streamlit_autorefresh import st_autorefresh
-    st_autorefresh(interval=30000, key="datarefresh")
+    st_autorefresh(interval=30000, key="refresh_cmd")
     
+    if st.button("🧹 Vider l'historique"):
+        c.execute("DELETE FROM commandes")
+        conn.commit()
+        st.rerun()
+
     cmds = pd.read_sql('SELECT * FROM commandes ORDER BY date DESC', conn)
     for _, row in cmds.iterrows():
-        with st.expander(f"Commande #{row['id']} - {row['type_commande']} - {int(row['total'])} FCFA"):
-            st.error(f"📍 INFOS : {row['detail_logistique']}")
-            st.write(f"Détails : {row['articles']}")
-            if st.button("Terminer", key=f"fin_{row['id']}"):
+        type_icon = "🪑" if row['type_commande'] == "Sur place" else "🚚"
+        with st.expander(f"{type_icon} {row['type_commande']} - {int(row['total'])} FCFA"):
+            st.error(f"📍 {row['detail_logistique']}")
+            st.write(f"**Articles :** {row['articles']}")
+            if st.button("Marquer comme servi", key=f"done_{row['id']}"):
                 c.execute('DELETE FROM commandes WHERE id=?', (row['id'],))
                 conn.commit()
                 st.rerun()
-
