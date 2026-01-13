@@ -247,3 +247,4 @@ elif choice == "📊 Espace Gérant":
                 c.execute("DELETE FROM menu WHERE id=?", (mi['id'],))
                 conn.commit()
                 st.rerun()
+
