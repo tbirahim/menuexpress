@@ -82,7 +82,7 @@ with tabs[0]:
     <div style="text-align: center; padding: 20px;">
         <h3>Bienvenue chez Vous</h3>
         <p style="color: #ccc;">Découvrez une cuisine généreuse, faite avec les meilleurs produits du terroir sénégalais. Du riz au poisson au Yassa fumant, chaque plat raconte une histoire.</p>
-        <p style="color: #d4af37; font-weight: bold;">📍 Dakar, Sénégal • ⏰ 12h00 - 23h30</p>
+        <p style="color: #d4af37; font-weight: bold;">📍 Mboro, Sénégal • ⏰ 12h00 - 23h30</p>
     </div>
     """, unsafe_allow_html=True)
 
@@ -177,3 +177,4 @@ with tabs[4]:
             conn.cursor().execute("DELETE FROM commandes"); conn.commit(); st.rerun()
         df_adm = pd.read_sql('SELECT * FROM commandes ORDER BY id DESC', conn)
         st.dataframe(df_adm)
+
