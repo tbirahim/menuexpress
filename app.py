@@ -179,7 +179,7 @@ with tabs[0]:
     st.markdown("---")
     
     st.subheader("Notre Équipe")
-    st.write("Le chef Diop et son équipe vous accueillent avec le sourire.")
+    st.write("Penda & Debo vous accueillent avec le sourire.")
     st.image("https://images.unsplash.com/photo-1600565193348-f74bd3c7ccdf?q=80&w=2071", use_container_width=True)
 
 
@@ -338,3 +338,4 @@ with tabs[4]:
                     c.execute('DELETE FROM menu WHERE id=?', (r['id'],))
                     conn.commit()
                     st.rerun()
+
