@@ -7,15 +7,15 @@ import base64
 
 # --- 1. CONFIGURATION ---
 st.set_page_config(
-    page_title="Teranga Gourmet", 
+    page_title="Menu-Express", 
     page_icon="🥘", 
     layout="wide", 
     initial_sidebar_state="collapsed"
 )
 
 # 🔴 CONFIGURATION PERSONNELLE
-NUMERO_WHATSAPP = "221770000000"
-NUMERO_APPEL = "770000000"
+NUMERO_WHATSAPP = "221778615900"
+NUMERO_APPEL = "778615900"
 
 # Sécurité : Le mot de passe est géré via st.secrets sur le Cloud
 try:
@@ -200,4 +200,5 @@ elif page == "Admin":
         with tab_histo:
             df_c = pd.read_sql('SELECT * FROM commandes ORDER BY id DESC', get_connection())
             st.dataframe(df_c, use_container_width=True)
+
 
