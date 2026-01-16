@@ -89,7 +89,7 @@ def remove_from_cart(index):
 
 # --- 5. NAVIGATION (SIDEBAR) ---
 with st.sidebar:
-    st.markdown("<h2 style='text-align:left;'>Teranga Gourmet</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 style='text-align:left;'>Menu express</h2>", unsafe_allow_html=True)
     nb_items = sum(item['qty'] for item in st.session_state.cart)
     page = st.radio("Navigation", ["Accueil", "La Carte", "Réserver", f"Panier ({nb_items})", "Admin"])
     st.write("---")
@@ -200,5 +200,6 @@ elif page == "Admin":
         with tab_histo:
             df_c = pd.read_sql('SELECT * FROM commandes ORDER BY id DESC', get_connection())
             st.dataframe(df_c, use_container_width=True)
+
 
 
