@@ -98,12 +98,12 @@ with st.sidebar:
 # --- PAGES ---
 
 if page == "Accueil":
-    st.image("https://images.unsplash.com/photo-1599481238640-4c1288750d7a?q=80&w=2070", use_container_width=True)
+    st.image("https://www.luxe-infinity-afrique.com/wp-content/uploads/2025/08/La-Cuisine-Africaine-Conquiert-la-France-1200x675.webp", use_container_width=True)
     st.markdown("<h1>L'Authenticité du Sénégal</h1>", unsafe_allow_html=True)
     st.markdown("<p style='text-align:center;'>Bienvenue chez Teranga Gourmet. Goûtez à la passion de notre terroir.</p>", unsafe_allow_html=True)
 
 elif page == "La Carte":
-    st.image("https://images.unsplash.com/photo-1555939594-58d7cb561ad1?q=80&w=1974", use_container_width=True)
+    st.image("https://i.pinimg.com/736x/bf/0b/1c/bf0b1c9a8bcac534c692d3e627b5275b.jpg", use_container_width=True)
     st.header("Notre Menu")
     
     df_menu = pd.read_sql('SELECT * FROM menu', get_connection())
@@ -200,3 +200,4 @@ elif page == "Admin":
         with tab_histo:
             df_c = pd.read_sql('SELECT * FROM commandes ORDER BY id DESC', get_connection())
             st.dataframe(df_c, use_container_width=True)
+
