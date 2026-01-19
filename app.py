@@ -4,7 +4,7 @@ import { View, MenuItem, CartItem, Order } from './types';
 import { INITIAL_MENU, WHATSAPP_NUMBER, CALL_NUMBER, ADMIN_PASS } from './constants';
 import { getChefRecommendation } from './services/geminiService';
 
-// --- Icon Components (SVG) - Robust & Lightweight ---
+// --- Icon Components (SVG) - Robust, Zero Emojis ---
 const Icons = {
   Home: () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" /></svg>,
   Menu: () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" /></svg>,
@@ -12,7 +12,10 @@ const Icons = {
   Cart: () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" /></svg>,
   Admin: () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" d="M10.343 3.94c.09-.542.56-.94 1.11-.94h1.093c.55 0 1.02.398 1.11.94l.149.894c.07.424.384.764.78.93.398.164.855.142 1.205-.108l.737-.527a1.125 1.125 0 0 1 1.45.12l.773.774a1.125 1.125 0 0 1 .12 1.45l-.527.737c-.25.35-.272.806-.107 1.204.165.397.505.71.93.78l.893.15c.543.09.94.56.94 1.109v1.094c0 .55-.397 1.02-.94 1.11l-.893.149c-.425.07-.765.383-.93.78-.165.398-.143.854.107 1.204l.527.738a1.125 1.125 0 0 1-.12 1.45l-.772.773a1.125 1.125 0 0 1-1.45.12l-.737-.527c-.35-.25-.806-.272-1.203-.107-.397.165-.71.505-.781.929l-.149.894c-.09.542-.56.94-1.11.94h-1.094c-.55 0-1.019-.398-1.11-.94l-.148-.894c-.071-.424-.384-.764-.781-.93-.398-.164-.854-.142-1.204.108l-.738.527a1.125 1.125 0 0 1-1.45-.12l-.773-.774a1.125 1.125 0 0 1-.12-1.45l.527-.737c.25-.35.273-.806.108-1.204-.165-.397-.505-.71-.93-.78l-.894-.15c-.542-.09-.94-.56-.94-1.109v-1.094c0-.55.398-1.02.94-1.11l.894-.149c.424-.07.765-.383.93-.78.165-.398.143-.854-.108-1.204l-.526-.738a1.125 1.125 0 0 1 .12-1.45l.773-.773a1.125 1.125 0 0 1 1.45-.12l.737.527c.35.25.807.272 1.204.107.397-.165.71-.505.78-.929l.15-.894Z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0" /></svg>,
   Call: () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 0 0 2.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.387a12.035 12.035 0 0 1-7.143-7.143c-.155-.441.011-.928.387-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 0 0-1.091-.852H4.5A2.25 2.25 0 0 0 2.25 4.5v2.25Z" /></svg>,
-  Trash: () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" /></svg>
+  Trash: () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" /></svg>,
+  Chef: () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8"><path strokeLinecap="round" strokeLinejoin="round" d="M15.362 5.214A8.252 8.252 0 0 1 12 21 8.25 8.25 0 0 1 6.038 7.048 8.287 8.287 0 0 0 9 9.601a8.983 8.983 0 0 1 3.361-6.867 8.21 8.21 0 0 0 3 2.48Z" /></svg>,
+  Rocket: () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5" /></svg>,
+  Location: () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" /><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" /></svg>
 };
 
 // --- Helper Components ---
@@ -27,10 +30,10 @@ const Navbar: React.FC<{
       <div className="w-8 h-8 bg-amber-500 rounded-lg flex items-center justify-center text-black font-extrabold shadow-inner">T</div>
       <h1 className="text-xl text-amber-500 font-bold tracking-widest uppercase font-serif">Teranga Express</h1>
     </div>
-    <div className="flex gap-2 md:gap-8 overflow-x-auto no-scrollbar justify-center flex-1 md:flex-none">
+    <div className="flex gap-1 md:gap-8 overflow-x-auto no-scrollbar justify-center flex-1 md:flex-none">
       <NavItem active={currentView === 'home'} onClick={() => setView('home')} icon={<Icons.Home />} label="Accueil" />
       <NavItem active={currentView === 'menu'} onClick={() => setView('menu')} icon={<Icons.Menu />} label="La Carte" />
-      <NavItem active={currentView === 'reserve'} onClick={() => setView('reserve')} icon={<Icons.Reserve />} label="Réserver" />
+      <NavItem active={currentView === 'reserve'} onClick={() => setView('reserve'} icon={<Icons.Reserve />} label="Réserver" />
       <NavItem active={currentView === 'cart'} onClick={() => setView('cart')} icon={<Icons.Cart />} label="Panier" badge={cartCount > 0 ? cartCount : undefined} />
       <NavItem active={currentView === 'admin'} onClick={() => setView('admin')} icon={<Icons.Admin />} label="Admin" />
     </div>
@@ -50,7 +53,7 @@ const NavItem: React.FC<{ active: boolean, onClick: () => void, icon: React.Reac
     <div className={`transition-transform duration-300 ${active ? 'scale-110 -translate-y-0.5' : ''}`}>{icon}</div>
     <span className="text-[9px] uppercase font-bold tracking-wider mt-1.5 opacity-80">{label}</span>
     {badge !== undefined && (
-      <span className="absolute top-1 right-2.5 bg-amber-500 text-black text-[10px] font-black w-4 h-4 rounded-full flex items-center justify-center shadow-lg animate-pulse ring-2 ring-zinc-900">
+      <span className="absolute top-1 right-1 bg-amber-500 text-black text-[10px] font-black w-4 h-4 rounded-full flex items-center justify-center shadow-lg animate-pulse ring-2 ring-zinc-900">
         {badge}
       </span>
     )}
@@ -70,7 +73,7 @@ const App: React.FC = () => {
     const saved = localStorage.getItem('tg_orders');
     return saved ? JSON.parse(saved) : [];
   });
-  const [aiMessage, setAiMessage] = useState("Bonjour ! Je suis le Chef. Envie de quelque chose de spécial aujourd'hui ?");
+  const [aiMessage, setAiMessage] = useState("Bonjour ! Je suis le Chef Teranga. Quel plat authentique vous ferait plaisir aujourd'hui ?");
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [adminCode, setAdminCode] = useState("");
 
@@ -142,13 +145,12 @@ const App: React.FC = () => {
     setOrders([newOrder, ...orders]);
     
     const itemString = cart.map(i => "- " + i.name + " (x" + i.quantity + ")").join('\n');
-    const msg = "NOUVELLE COMMANDE TERANGA\n\n" + itemString + "\n\nTotal: " + cartTotal + " FCFA\nMode: " + type + "\nDétails: " + logistics;
+    const msg = "NOUVELLE COMMANDE TERANGA\n\n" + itemString + "\n\nTotal: " + cartTotal + " FCFA\nMode: " + type + "\nDetails: " + logistics;
     const waLink = "https://wa.me/" + WHATSAPP_NUMBER + "?text=" + encodeURIComponent(msg);
     
     window.open(waLink, '_blank');
     setCart([]);
     setView('home');
-    alert("Commande transmise à WhatsApp !");
   };
 
   return (
@@ -168,7 +170,7 @@ const App: React.FC = () => {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/20 to-transparent"></div>
               <div className="relative z-10 text-center space-y-6 px-6">
-                <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-amber-500/10 border border-amber-500/30 rounded-full text-amber-500 text-[10px] font-black uppercase tracking-[0.2em] mb-2 backdrop-blur-sm shadow-xl">Teranga Express Mboro</div>
+                <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-amber-500/10 border border-amber-500/30 rounded-full text-amber-500 text-[10px] font-black uppercase tracking-[0.2em] mb-2 backdrop-blur-sm shadow-xl">Teranga Express - Dakar</div>
                 <h1 className="text-5xl md:text-8xl font-serif text-amber-500 drop-shadow-2xl font-bold tracking-tight">Teranga Gourmet</h1>
                 <p className="text-lg md:text-2xl font-light italic text-zinc-200 max-w-2xl mx-auto leading-relaxed">Une invitation au voyage culinaire entre tradition et excellence.</p>
                 <div className="flex flex-wrap justify-center gap-4 pt-6">
@@ -189,14 +191,15 @@ const App: React.FC = () => {
               <div className="bg-zinc-900/40 backdrop-blur-xl p-8 sm:p-10 rounded-[2.5rem] border border-white/5 shadow-2xl flex flex-col justify-between">
                 <div className="space-y-6">
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-amber-500 rounded-2xl flex items-center justify-center text-black shadow-lg">👨‍🍳</div>
+                    <div className="w-12 h-12 bg-amber-500 rounded-2xl flex items-center justify-center text-black shadow-lg">
+                      <Icons.Chef />
+                    </div>
                     <div>
                         <h2 className="text-2xl font-serif text-amber-500 font-bold">Le Chef Virtuel</h2>
-                        <p className="text-[10px] text-zinc-500 uppercase font-black tracking-widest">Powered by Gemini AI</p>
+                        <p className="text-[10px] text-zinc-500 uppercase font-black tracking-widest">Intelligence Artificielle</p>
                     </div>
                   </div>
                   <div className="bg-zinc-800/50 p-6 sm:p-8 rounded-3xl border-l-[6px] border-amber-500 shadow-inner min-h-[140px] relative overflow-hidden group">
-                    <div className="absolute top-2 right-2 opacity-10 group-hover:opacity-20 transition-opacity"><Icons.Menu /></div>
                     <p className={"text-zinc-200 leading-relaxed text-lg italic " + (isAiLoading ? "animate-pulse opacity-50" : "")}>
                       {isAiLoading ? "En train de mijoter une réponse..." : aiMessage}
                     </p>
@@ -206,7 +209,7 @@ const App: React.FC = () => {
                   <input 
                     name="aiPrompt"
                     required
-                    placeholder="Conseillez-moi une boisson fraîche..." 
+                    placeholder="Qu'est-ce qui est bon aujourd'hui ?" 
                     className="flex-1 bg-zinc-900 border border-zinc-800 rounded-2xl px-6 py-4 focus:outline-none focus:ring-2 focus:ring-amber-500/50 transition-all text-sm placeholder:text-zinc-600 shadow-inner"
                   />
                   <button type="submit" disabled={isAiLoading} className="bg-amber-500 text-black px-8 py-4 rounded-2xl font-black hover:bg-amber-400 disabled:opacity-50 transition-all shadow-lg active:scale-95 uppercase text-xs tracking-widest">
@@ -218,11 +221,11 @@ const App: React.FC = () => {
                 <img 
                     src="https://images.unsplash.com/photo-1556910103-1c02745aae4d?q=80&w=800" 
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[10s]"
-                    alt="Chef Presentation"
+                    alt="Cuisine Teranga"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/80 to-transparent"></div>
                 <div className="absolute bottom-6 left-6 right-6">
-                    <p className="text-white font-serif italic text-lg leading-snug">"Chaque plat raconte une histoire, chaque épice murmure un secret de nos terres."</p>
+                    <p className="text-white font-serif italic text-lg leading-snug">Chaque plat raconte une histoire, chaque epice murmure un secret de nos terres.</p>
                 </div>
               </div>
             </div>
@@ -234,7 +237,7 @@ const App: React.FC = () => {
           <div className="space-y-12 animate-in slide-in-from-bottom-10 duration-700">
             <div className="text-center space-y-4">
                 <h1 className="text-5xl md:text-6xl font-serif text-amber-500 font-bold">La Carte Gourmet</h1>
-                <p className="text-zinc-400 max-w-2xl mx-auto text-lg">Une sélection rigoureuse des meilleurs produits du terroir sénégalais.</p>
+                <p className="text-zinc-400 max-w-2xl mx-auto text-lg">Une selection rigoureuse des meilleurs produits du terroir.</p>
                 <div className="flex flex-wrap justify-center gap-3 pt-6">
                     {['Tous', 'Entrée', 'Plat', 'Dessert', 'Boisson'].map(cat => (
                     <button key={cat} className={"px-6 py-2 rounded-full text-xs font-black tracking-widest uppercase transition-all shadow-md " + (cat === 'Tous' ? 'bg-amber-500 text-black shadow-amber-500/20' : 'bg-zinc-900 border border-zinc-800 text-zinc-500 hover:text-white hover:bg-zinc-800')}>
@@ -258,8 +261,8 @@ const App: React.FC = () => {
                   </div>
                   <div className="p-8 space-y-5 flex-1 flex flex-col justify-between">
                     <div className="space-y-3">
-                      <div className="flex items-center gap-2">
-                        <span className="w-2 h-2 bg-amber-500 rounded-full"></span>
+                      <div className="flex items-center gap-2 text-amber-500">
+                        <Icons.Menu />
                         <h3 className="text-2xl font-serif font-bold group-hover:text-amber-500 transition-colors leading-tight">{item.name}</h3>
                       </div>
                       <p className="text-zinc-400 text-sm leading-relaxed opacity-80 line-clamp-3">{item.description}</p>
@@ -283,7 +286,7 @@ const App: React.FC = () => {
              <div className="relative rounded-[3rem] overflow-hidden h-64 shadow-2xl border border-white/5">
               <img src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=800" className="w-full h-full object-cover opacity-50" alt="Res" />
               <div className="absolute inset-0 flex flex-col items-center justify-center space-y-3 text-center px-6">
-                <h1 className="text-5xl md:text-6xl font-serif text-amber-500 font-bold drop-shadow-lg">Réservation Privée</h1>
+                <h1 className="text-5xl md:text-6xl font-serif text-amber-500 font-bold drop-shadow-lg">Reservation Privée</h1>
                 <p className="text-zinc-300 text-lg italic">Assurez-vous d'avoir la meilleure place à notre table.</p>
               </div>
             </div>
@@ -377,12 +380,11 @@ const App: React.FC = () => {
                     </div>
                     <div className="space-y-4">
                       <label className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] ml-2">Coordonnées / N° Table</label>
-                      <textarea name="logistics" required className="w-full bg-zinc-950 border border-zinc-800 p-5 rounded-2xl focus:ring-4 focus:ring-amber-500/10 outline-none min-h-[140px] text-sm placeholder:text-zinc-700 shadow-inner" placeholder="Adresse précise ou numéro de table pour vous servir au mieux..." />
+                      <textarea name="logistics" required className="w-full bg-zinc-950 border border-zinc-800 p-5 rounded-2xl focus:ring-4 focus:ring-amber-500/10 outline-none min-h-[140px] text-sm placeholder:text-zinc-700 shadow-inner" placeholder="Adresse précise ou numéro de table..." />
                     </div>
                     <button className="w-full py-6 bg-green-500 text-white font-black rounded-3xl shadow-2xl hover:bg-green-600 transition-all flex items-center justify-center gap-4 active:scale-95 transform group uppercase tracking-widest text-xs">
-                      Envoyer sur WhatsApp <span className="group-hover:translate-x-2 transition-transform">🚀</span>
+                      Commander sur WhatsApp <Icons.Rocket />
                     </button>
-                    <p className="text-[9px] text-zinc-600 text-center uppercase font-black leading-relaxed tracking-tighter max-w-[200px] mx-auto opacity-60">Paiement à la livraison ou à table. Votre vie privée est protégée.</p>
                   </form>
                 </div>
               </div>
@@ -410,7 +412,6 @@ const App: React.FC = () => {
                   onChange={(e) => setAdminCode(e.target.value)}
                   className="w-full bg-zinc-950 p-5 rounded-3xl border border-zinc-800 text-center focus:ring-4 focus:ring-amber-500/20 text-2xl font-black tracking-[1em] outline-none shadow-inner"
                 />
-                <p className="text-[10px] text-zinc-600 italic">Indice standard : admin123</p>
               </div>
             ) : (
               <div className="grid lg:grid-cols-2 gap-16">
@@ -444,15 +445,14 @@ const App: React.FC = () => {
                   </form>
                   
                   <div className="bg-zinc-900/30 p-8 rounded-[2.5rem] border border-white/5 max-h-[600px] overflow-y-auto no-scrollbar shadow-2xl space-y-4">
-                    <h4 className="text-[10px] font-black text-zinc-500 uppercase tracking-widest ml-2 mb-4">Aperçu du stock</h4>
                     {menu.map(m => (
-                      <div key={m.id} className="flex items-center gap-5 bg-zinc-800/30 p-4 rounded-2xl group hover:bg-zinc-800/50 transition-colors border border-white/5">
-                        <img src={m.image} className="w-16 h-16 object-cover rounded-xl shadow-lg shadow-black/40" alt={m.name} />
+                      <div key={m.id} className="flex items-center gap-5 bg-zinc-800/30 p-4 rounded-2xl group border border-white/5 transition-colors">
+                        <img src={m.image} className="w-16 h-16 object-cover rounded-xl" alt={m.name} />
                         <div className="flex-1 min-w-0">
                           <p className="font-black truncate text-zinc-100">{m.name}</p>
                           <p className="text-amber-500 font-bold text-xs">{m.price.toLocaleString()} FCFA</p>
                         </div>
-                        <button onClick={() => setMenu(menu.filter(i => i.id !== m.id))} className="text-zinc-600 hover:text-red-500 p-3 bg-zinc-900 rounded-xl transition-all">
+                        <button onClick={() => setMenu(menu.filter(i => i.id !== m.id))} className="text-zinc-600 hover:text-red-500 p-3 bg-zinc-900 rounded-xl">
                           <Icons.Trash />
                         </button>
                       </div>
@@ -462,21 +462,20 @@ const App: React.FC = () => {
 
                 <div className="space-y-10">
                   <h2 className="text-3xl font-serif text-amber-500 flex items-center gap-4 font-bold">
-                    <span className="p-3 bg-amber-500/10 rounded-2xl shadow-inner"><Icons.Reserve /></span> Journal des Ventes
+                    <span className="p-3 bg-amber-500/10 rounded-2xl shadow-inner"><Icons.Reserve /></span> Journal de Bord
                   </h2>
                   <div className="space-y-6 h-full">
                     {orders.length === 0 ? (
                       <div className="bg-zinc-900/20 p-20 rounded-[3rem] border-4 border-dashed border-zinc-800/50 text-center flex flex-col items-center justify-center opacity-40">
-                        <div className="mb-4 text-zinc-700"><Icons.Menu /></div>
-                        <p className="text-xl font-serif italic">Aucune activité enregistrée.</p>
+                        <p className="text-xl font-serif italic">En attente d'activité.</p>
                       </div>
                     ) : orders.map(order => (
-                      <div key={order.id} className="bg-zinc-900/80 p-8 rounded-[2.5rem] border border-zinc-800 relative group overflow-hidden shadow-2xl transition-all hover:border-amber-500/20">
-                        <div className="absolute top-0 left-0 w-1.5 h-full bg-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.5)]"></div>
+                      <div key={order.id} className="bg-zinc-900/80 p-8 rounded-[2.5rem] border border-zinc-800 relative overflow-hidden shadow-2xl">
+                        <div className="absolute top-0 left-0 w-1.5 h-full bg-amber-500"></div>
                         <div className="flex justify-between items-start mb-6">
                           <div className="space-y-1">
-                            <span className="text-[9px] bg-zinc-800 px-3 py-1 rounded-full text-zinc-400 font-black uppercase tracking-tighter shadow-inner">
-                                {new Date(order.timestamp).toLocaleString('fr-FR', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: 'short' })}
+                            <span className="text-[9px] bg-zinc-800 px-3 py-1 rounded-full text-zinc-400 font-black uppercase">
+                                {new Date(order.timestamp).toLocaleString()}
                             </span>
                             <p className="text-2xl font-black mt-3 text-amber-500 font-serif">{order.total.toLocaleString()} F</p>
                           </div>
@@ -485,29 +484,21 @@ const App: React.FC = () => {
                           </div>
                         </div>
                         <div className="space-y-4">
-                            <div className="bg-zinc-950/50 p-5 rounded-[1.5rem] border border-zinc-800/50 shadow-inner">
+                            <div className="bg-zinc-950/50 p-5 rounded-[1.5rem] border border-zinc-800/50 shadow-inner text-xs">
                                 {order.items.map((i, idx) => (
-                                    <div key={idx} className="flex justify-between text-xs py-2 border-b border-zinc-800/50 last:border-0">
-                                        <span className="text-zinc-300 font-bold">{i.name} <span className="text-zinc-600 font-normal">x{i.quantity}</span></span>
-                                        <span className="font-mono text-amber-500/80">{(i.price * i.quantity).toLocaleString()}</span>
+                                    <div key={idx} className="flex justify-between py-1 border-b border-zinc-800/50 last:border-0">
+                                        <span>{i.name} (x{i.quantity})</span>
+                                        <span className="font-mono">{(i.price * i.quantity).toLocaleString()}</span>
                                     </div>
                                 ))}
                             </div>
-                            <div className="flex items-start gap-2 text-xs text-zinc-500 bg-amber-500/5 p-4 rounded-xl border border-amber-500/10 italic">
-                                <span>📍</span>
+                            <div className="flex items-start gap-2 text-xs text-zinc-500 italic">
+                                <Icons.Location />
                                 <span>{order.logistics}</span>
                             </div>
                         </div>
                       </div>
                     ))}
-                    {orders.length > 0 && (
-                      <button 
-                        onClick={() => { if(confirm("Voulez-vous réinitialiser l'historique ?")) setOrders([]) }} 
-                        className="w-full py-4 text-red-500/50 text-[10px] uppercase font-black tracking-[0.3em] hover:text-red-500 hover:bg-red-500/5 rounded-2xl transition-all border border-transparent hover:border-red-500/10 mt-6"
-                      >
-                        Effacer les Archives
-                      </button>
-                    )}
                   </div>
                 </div>
               </div>
@@ -519,15 +510,14 @@ const App: React.FC = () => {
       <footer className="py-16 border-t border-zinc-900/50 mt-20 bg-zinc-900/10 text-center space-y-8">
         <div className="flex justify-center items-center gap-6">
             <div className="h-px w-12 bg-zinc-800"></div>
-            <div className="text-amber-500 font-serif italic text-lg opacity-80 font-bold">Teranga Express Dakar</div>
+            <div className="text-amber-500 font-serif italic text-lg opacity-80 font-bold">Teranga Express</div>
             <div className="h-px w-12 bg-zinc-800"></div>
         </div>
         <div className="space-y-3 opacity-60">
-            <p className="text-[10px] text-zinc-500 uppercase tracking-[0.4em] font-black">L'art du Bien-Recevoir • SÉNÉGAL</p>
+            <p className="text-[10px] text-zinc-500 uppercase tracking-[0.4em] font-black">L'art du Bien-Recevoir • SENEGAL</p>
             <div className="flex justify-center gap-8 text-[11px] font-bold">
                 <a href={"tel:" + CALL_NUMBER} className="text-amber-500 hover:underline">{CALL_NUMBER}</a>
-                <span className="text-zinc-800">/</span>
-                <span className="text-zinc-400">7j/7 • 11:30 - 23:30</span>
+                <span className="text-zinc-600">7j/7 • 11:30 - 23:30</span>
             </div>
         </div>
         <p className="text-[9px] text-zinc-800 mt-10">© 2024 Teranga Gourmet Express. Tous droits réservés.</p>
@@ -537,4 +527,3 @@ const App: React.FC = () => {
 };
 
 export default App;
-
