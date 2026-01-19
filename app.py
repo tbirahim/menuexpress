@@ -33,7 +33,7 @@ const Navbar: React.FC<{
     <div className="flex gap-1 md:gap-8 overflow-x-auto no-scrollbar justify-center flex-1 md:flex-none">
       <NavItem active={currentView === 'home'} onClick={() => setView('home')} icon={<Icons.Home />} label="Accueil" />
       <NavItem active={currentView === 'menu'} onClick={() => setView('menu')} icon={<Icons.Menu />} label="La Carte" />
-      <NavItem active={currentView === 'reserve'} onClick={() => setView('reserve'} icon={<Icons.Reserve />} label="Réserver" />
+      <NavItem active={currentView === 'reserve'} onClick={() => setView('reserve') icon={<Icons.Reserve />} label="Réserver" />
       <NavItem active={currentView === 'cart'} onClick={() => setView('cart')} icon={<Icons.Cart />} label="Panier" badge={cartCount > 0 ? cartCount : undefined} />
       <NavItem active={currentView === 'admin'} onClick={() => setView('admin')} icon={<Icons.Admin />} label="Admin" />
     </div>
@@ -527,3 +527,4 @@ const App: React.FC = () => {
 };
 
 export default App;
+
