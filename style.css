@@ -1,0 +1,23 @@
+.stApp {
+    background-color: #0e1117;
+}
+
+h1, h2, h3 {
+    color: #ffffff;
+}
+
+.stButton > button {
+    background-color: #ff4b4b;
+    color: white;
+    border-radius: 8px;
+    border: none;
+    font-weight: bold;
+}
+
+.stButton > button:hover {
+    opacity: 0.9;
+}
+
+.sidebar .sidebar-content {
+    background-color: #262730;
+}
