@@ -168,7 +168,7 @@ const App: React.FC = () => {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/20 to-transparent"></div>
               <div className="relative z-10 text-center space-y-6 px-6">
-                <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-amber-500/10 border border-amber-500/30 rounded-full text-amber-500 text-[10px] font-black uppercase tracking-[0.2em] mb-2 backdrop-blur-sm shadow-xl">Teranga Express • Dakar</div>
+                <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-amber-500/10 border border-amber-500/30 rounded-full text-amber-500 text-[10px] font-black uppercase tracking-[0.2em] mb-2 backdrop-blur-sm shadow-xl">Teranga Express Mboro</div>
                 <h1 className="text-5xl md:text-8xl font-serif text-amber-500 drop-shadow-2xl font-bold tracking-tight">Teranga Gourmet</h1>
                 <p className="text-lg md:text-2xl font-light italic text-zinc-200 max-w-2xl mx-auto leading-relaxed">Une invitation au voyage culinaire entre tradition et excellence.</p>
                 <div className="flex flex-wrap justify-center gap-4 pt-6">
@@ -537,3 +537,4 @@ const App: React.FC = () => {
 };
 
 export default App;
+
