@@ -43,7 +43,7 @@ const Navbar: React.FC<{
       </a>
     </div>
   </nav>
-);
+};
 
 const NavItem: React.FC<{ active: boolean, onClick: () => void, icon: React.ReactNode, label: string, badge?: number }> = ({ active, onClick, icon, label, badge }) => (
   <button 
@@ -527,4 +527,5 @@ const App: React.FC = () => {
 };
 
 export default App;
+
 
