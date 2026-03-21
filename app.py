@@ -8,190 +8,170 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# 2. CSS Personnalisé (Synchronisé avec les couleurs du logo)
+# 2. CSS Personnalisé (Couleurs synchronisées avec le logo Chic Chic)
 st.markdown("""
     <style>
-    /* Couleurs principales basées sur le logo: 
-       Rouge: #E30613 | Vert: #009640 | Bleu: #0020C2 | Noir: #000000 
-    */
+    /* Couleurs Logo : Rouge (#E30613), Vert (#009640), Bleu (#0020C2), Noir (#000000) */
     
-    h1, h2, h3 {
-        color: #000000;
-        font-family: 'Helvetica Neue', sans-serif;
-        font-weight: 800;
-    }
-    .subtitle {
-        color: #4A4A4A;
-        font-size: 1.2rem;
-        margin-bottom: 2rem;
-    }
-    /* Bouton principal (Rouge du logo) */
+    /* Global */
+    .main { background-color: #ffffff; }
+    h1, h2, h3 { color: #000000; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    
+    /* Bouton Principal - ROUGE CHIC */
     .stButton>button {
-        background-color: #E30613; 
+        background-color: #E30613;
         color: white;
-        border-radius: 8px;
+        border-radius: 5px;
         border: none;
-        padding: 10px 24px;
+        padding: 0.6rem 2rem;
         font-weight: bold;
-        transition: all 0.3s ease;
+        width: 100%;
+        transition: 0.3s;
     }
     .stButton>button:hover {
-        background-color: white;
+        background-color: #000000;
         color: #E30613;
-        border: 2px solid #E30613;
+        border: 1px solid #E30613;
     }
-    /* Cartes de services avec les couleurs des gouttes du logo */
+
+    /* Cartes de Services */
     .service-card {
-        padding: 20px;
-        border-radius: 10px;
-        background-color: #fcfcfc;
-        margin-bottom: 15px;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        padding: 25px;
+        border-radius: 12px;
+        background-color: #f8f9fa;
+        margin-bottom: 20px;
+        box-shadow: 2px 2px 15px rgba(0,0,0,0.05);
+        transition: transform 0.3s;
     }
-    .card-red { border-left: 6px solid #E30613; }
-    .card-green { border-left: 6px solid #009640; }
-    .card-blue { border-left: 6px solid #0020C2; }
-    .card-black { border-left: 6px solid #000000; }
+    .service-card:hover { transform: translateY(-5px); }
+    
+    .border-red { border-top: 5px solid #E30613; }
+    .border-green { border-top: 5px solid #009640; }
+    .border-blue { border-top: 5px solid #0020C2; }
+    .border-black { border-top: 5px solid #000000; }
+
+    /* Barre latérale */
+    section[data-testid="stSidebar"] {
+        background-color: #f0f2f6;
+    }
     </style>
 """, unsafe_allow_html=True)
 
-# 3. Navigation dans la barre latérale
-# On affiche le logo que tu as fourni
-try:
-    # Remplace la ligne st.sidebar.image par celle-ci :
-st.sidebar.image("https://files.catbox.moe/p9o48g.png", use_container_width=True)
-except FileNotFoundError:
-    st.sidebar.error("⚠️ Image 'logo.png' introuvable. Place le logo dans le même dossier.")
+# 3. Barre latérale (Sidebar)
+# Utilisation du lien direct pour éviter les erreurs de fichier local
+logo_url = "https://files.catbox.moe/p9o48g.png" 
+st.sidebar.image(logo_url, use_container_width=True)
 
-st.sidebar.markdown("---")
+st.sidebar.markdown("<h2 style='text-align: center; color: #000;'>Menu Principal</h2>", unsafe_allow_html=True)
 menu = st.sidebar.radio(
-    "Navigation",
-    ["Accueil", "Nos Services", "Nos Réalisations", "Contact"]
+    "",
+    ["🏠 Accueil", "🛠️ Nos Services", "🖼️ Portfolio", "📩 Contact"]
 )
+
 st.sidebar.markdown("---")
-st.sidebar.info("📍 Basé au Sénégal\n\n📞 +221 XX XXX XX XX\n\n✉️ contact@chicchic.sn")
+st.sidebar.markdown("""
+**📍 Localisation** Dakar, Sénégal  
 
-# 4. Contenu des pages
+**📞 Contact** +221 77 XXX XX XX  
 
-if menu == "Accueil":
+**📧 Email** contact@chicchic.sn
+""")
+
+# 4. Logique des pages
+
+if menu == "🏠 Accueil":
     col1, col2 = st.columns([3, 2])
     
     with col1:
-        st.title("L'art de l'impression et du design.")
-        st.markdown('<p class="subtitle">Chic Chic Graphic & Print est votre studio créatif pour des supports de communication qui marquent les esprits.</p>', unsafe_allow_html=True)
-        if st.button("Découvrir nos services 🚀"):
-            st.success("Naviguez vers l'onglet 'Nos Services' dans le menu à gauche !")
+        st.title("L'expertise Graphique & Print qui fait la différence.")
+        st.write("""
+        Bienvenue chez **Chic Chic**. Nous transformons vos concepts en réalité visuelle. 
+        Que ce soit pour de l'impression grand format ou une identité visuelle complète, 
+        notre équipe met sa créativité au service de votre succès.
+        """)
+        if st.button("Voir nos offres"):
+            st.info("Utilisez le menu à gauche pour explorer nos services !")
             
     with col2:
-        # Image d'illustration (tu pourras remplacer par une photo de tes machines ou de ton équipe)
-        st.image("https://images.unsplash.com/photo-1561070791-2526d30994b5?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80", use_container_width=True)
-        
+        # Image d'ambiance professionnelle
+        st.image("https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=600&q=80")
+
     st.markdown("---")
-    
-    st.subheader("Pourquoi choisir Chic Chic ?")
+    st.subheader("Nos engagements")
     c1, c2, c3 = st.columns(3)
-    with c1:
-        st.markdown("### 🎨 Créativité")
-        st.write("Des designs uniques, aussi vibrants que nos couleurs, pour refléter l'ADN de votre marque.")
-    with c2:
-        st.markdown("### 🖨️ Qualité Premium")
-        st.write("Impression haute définition sur des supports soigneusement sélectionnés pour un rendu impeccable.")
-    with c3:
-        st.markdown("### ⚡ Réactivité")
-        st.write("Une équipe engagée pour livrer vos projets professionnels dans les meilleurs délais.")
+    c1.metric("Qualité", "Premium")
+    c2.metric("Délais", "Express")
+    c3.metric("Support", "24/7")
 
-elif menu == "Nos Services":
-    st.title("Nos Domaines d'Expertise 🛠️")
-    st.markdown("Découvrez nos solutions sur-mesure pour votre communication.")
-    st.markdown("<br>", unsafe_allow_html=True)
+elif menu == "🛠️ Nos Services":
+    st.title("Nos Solutions de Communication")
     
-    col1, col2 = st.columns(2)
+    colA, colB = st.columns(2)
     
-    with col1:
+    with colA:
         st.markdown("""
-        <div class="service-card card-red">
-            <h3 style="color: #E30613;">🖨️ Impression Numérique</h3>
-            <p>De la petite à la grande série, nous imprimons vos documents avec une précision absolue : affiches, flyers, brochures...</p>
+        <div class="service-card border-red">
+            <h3 style="color:#E30613">🖨️ Impression Numérique</h3>
+            <p>Cartes de visite, flyers, brochures et catalogues. Une finition haut de gamme pour tous vos documents.</p>
         </div>
         """, unsafe_allow_html=True)
         
         st.markdown("""
-        <div class="service-card card-green">
-            <h3 style="color: #009640;">🎨 Conception Graphique</h3>
-            <p>Création de logos, chartes graphiques, et identités visuelles. Notre studio donne vie à vos idées.</p>
+        <div class="service-card border-blue">
+            <h3 style="color:#0020C2">📢 Signalétique & Grand Format</h3>
+            <p>Bâches, Roll-up, habillage de vitrines et de véhicules. Soyez visible de loin !</p>
         </div>
         """, unsafe_allow_html=True)
 
-    with col2:
+    with colB:
         st.markdown("""
-        <div class="service-card card-blue">
-            <h3 style="color: #0020C2;">📢 Supports Grand Format</h3>
-            <p>Bâches, roll-ups, vitrophanie et habillage de véhicules pour maximiser votre visibilité.</p>
+        <div class="service-card border-green">
+            <h3 style="color:#009640">🎨 Conception Graphique</h3>
+            <p>Création de logos, charte graphique et réseaux sociaux. Une identité unique pour votre entreprise.</p>
         </div>
         """, unsafe_allow_html=True)
         
         st.markdown("""
-        <div class="service-card card-black">
-            <h3 style="color: #000000;">📦 Packaging & Étiquettes</h3>
-            <p>Sublimez vos produits avec des emballages personnalisés professionnels et attractifs.</p>
+        <div class="service-card border-black">
+            <h3 style="color:#000000">📦 Packaging</h3>
+            <p>Conception d'emballages personnalisés et étiquettes produits pour une présentation irréprochable.</p>
         </div>
         """, unsafe_allow_html=True)
 
-elif menu == "Nos Réalisations":
-    st.title("Notre Portfolio 🖼️")
-    st.write("Un aperçu de nos récents projets d'impression et de design.")
+elif menu == "🖼️ Portfolio":
+    st.title("Nos Réalisations")
+    st.write("Découvrez quelques projets signés Chic Chic.")
     
-    col1, col2, col3 = st.columns(3)
+    tabs = st.tabs(["Print", "Design", "Signalétique"])
     
-    with col1:
-        st.image("https://images.unsplash.com/photo-1626785774573-4b799315345d?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80", caption="Identité Visuelle")
-        st.image("https://images.unsplash.com/photo-1586717791821-3f44a563fa4c?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80", caption="Impression Brochures")
+    with tabs[0]:
+        c1, c2 = st.columns(2)
+        c1.image("https://images.unsplash.com/photo-1593642532842-98d0fd5ebc1a?auto=format&fit=crop&w=500", caption="Flyers Premium")
+        c2.image("https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?auto=format&fit=crop&w=500", caption="Cartes de Visite")
         
-    with col2:
-        st.image("https://images.unsplash.com/photo-1600880292203-757bb62b4baf?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80", caption="Packaging Sur-Mesure")
-        st.image("https://images.unsplash.com/photo-1542744173-8e7e53415bb0?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80", caption="Affiches & Grand Format")
-        
-    with col3:
-        st.image("https://images.unsplash.com/photo-1629429408209-1f912961dbd8?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80", caption="Cartes de Visite")
-        st.image("https://images.unsplash.com/photo-1611162617474-5b21e879e113?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80", caption="Flyers Événementiels")
+    with tabs[1]:
+        st.image("https://images.unsplash.com/photo-1626785774573-4b799315345d?auto=format&fit=crop&w=1000", caption="Branding complet pour client Corporate")
 
-elif menu == "Contact":
-    st.title("Parlons de votre projet ☕")
-    st.write("Laissez-nous un message, l'équipe Chic Chic vous répondra rapidement.")
+    with tabs[2]:
+        st.image("https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&w=1000", caption="Pose de signalétique événementielle")
+
+elif menu == "📩 Contact":
+    st.title("Prêt à démarrer un projet ?")
     
-    col_form, col_info = st.columns([2, 1])
-    
-    with col_form:
-        with st.form("contact_form"):
-            nom = st.text_input("Votre Nom / Entreprise")
-            email = st.text_input("Votre Email")
-            besoin = st.selectbox("Quel est votre besoin principal ?", 
-                                  ["Impression Numérique", "Conception Graphique", "Création de Logo", "Support Grand Format", "Autre"])
-            message = st.text_area("Décrivez votre projet")
-            
-            submit_button = st.form_submit_button("Envoyer la demande")
-            
-            if submit_button:
-                if nom and email and message:
-                    st.success(f"Merci {nom} ! Votre demande a bien été envoyée. Nous vous contacterons sous peu.")
-                    st.balloons()
-                else:
-                    st.error("Veuillez remplir tous les champs obligatoires.")
-                    
-    with col_info:
-        st.markdown("### 📍 Chic Chic Graphic & Print")
-        st.write("Quartier des Affaires")
-        st.write("Sénégal")
-        st.markdown("---")
-        st.write("🕒 **Horaires :**")
-        st.write("Lun - Ven : 09h00 - 18h00")
-        st.write("Samedi : 09h00 - 13h00")
-        st.markdown("---")
-        st.write("Suivez-nous sur les réseaux sociaux pour découvrir nos dernières créations !")
+    with st.form("form_contact"):
+        name = st.text_input("Nom ou Entreprise")
+        email = st.text_input("Email de contact")
+        service = st.multiselect("Services souhaités", ["Impression", "Logo/Design", "Signalétique", "Packaging"])
+        msg = st.text_area("Dites-nous en plus sur votre besoin")
+        
+        submitted = st.form_submit_button("Envoyer mon message")
+        if submitted:
+            if name and email and msg:
+                st.success(f"Merci {name} ! Votre message a été transmis. L'équipe Chic Chic vous recontactera sur {email}.")
+                st.balloons()
+            else:
+                st.warning("Veuillez remplir les champs obligatoires.")
 
 # Footer
-st.markdown("""
-    <div style="text-align: center; margin-top: 50px; color: #888; border-top: 1px solid #ddd; padding-top: 20px;">
-        <small>© 2026 Chic Chic Graphic & Print. Tous droits réservés.</small>
-    </div>
-""", unsafe_allow_html=True)
+st.markdown("---")
+st.markdown("<p style='text-align: center; color: #888;'>© 2026 Chic Chic Graphic & Print - Créativité & Professionnalisme</p>", unsafe_allow_html=True)
