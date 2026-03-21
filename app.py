@@ -58,7 +58,8 @@ st.markdown("""
 # 3. Navigation dans la barre latérale
 # On affiche le logo que tu as fourni
 try:
-    st.sidebar.image("logo.png", use_container_width=True) 
+    # Remplace la ligne st.sidebar.image par celle-ci :
+st.sidebar.image("https://files.catbox.moe/p9o48g.png", use_container_width=True)
 except FileNotFoundError:
     st.sidebar.error("⚠️ Image 'logo.png' introuvable. Place le logo dans le même dossier.")
 
