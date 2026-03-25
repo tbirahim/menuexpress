@@ -75,7 +75,7 @@ projects = [
         "category": "Social Media",
         "client": "Queen Style",
         "description": "Feed Instagram harmonisé.",
-        "result": x3 engagement"
+        "result": "x3 engagement"
     },
     {
         "title": "Packaging Jus",
