@@ -20,7 +20,7 @@ st.set_page_config(
 # CONSTANTES CENTRALES
 # ─────────────────────────────────────────────
 BRAND_NAME = "CHIC Graphic & Print"
-WHATSAPP_NUMBER = "221770000000"
+WHATSAPP_NUMBER = "221788377676"
 EMAIL = "contact@chic-graphic.sn"
 LOCATION = "Dakar, Sénégal"
 
