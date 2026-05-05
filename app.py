@@ -1,16 +1,37 @@
 import streamlit as st
 import re
-from datetime import datetime
+import urllib.parse
+import logging
 
 # ─────────────────────────────────────────────
-# CONFIG
+# CONFIGURATION ET JOURNALISATION
 # ─────────────────────────────────────────────
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 st.set_page_config(
     page_title="Chic Chic ULTRA | Agence Créative",
     page_icon="✦",
     layout="wide",
     initial_sidebar_state="expanded",
 )
+
+# ─────────────────────────────────────────────
+# CONSTANTES CENTRALES
+# ─────────────────────────────────────────────
+WHATSAPP_NUMBER = "221770000000"
+EMAIL = "contact@chicchic.sn"
+LOCATION = "Dakar, Sénégal"
+
+# ─────────────────────────────────────────────
+# GESTION D'ÉTAT (SESSION STATE)
+# ─────────────────────────────────────────────
+if "devis_nom" not in st.session_state:
+    st.session_state.devis_nom = ""
+if "devis_desc" not in st.session_state:
+    st.session_state.devis_desc = ""
+if "wide_mode" not in st.session_state:
+    st.session_state.wide_mode = True
 
 # ─────────────────────────────────────────────
 # CSS GLOBAL
@@ -44,9 +65,8 @@ h1, h2, h3 {
 
 /* ── Sidebar ───────────────────────────────── */
 section[data-testid="stSidebar"] {
-    background: var(--noir) !important;
-    border-right: 3px solid var(--rouge);
     background: linear-gradient(180deg, #0C4A6E 0%, #075985 100%) !important;
+    border-right: 3px solid var(--rouge);
 }
 section[data-testid="stSidebar"] * {
     color: var(--blanc) !important;
@@ -251,7 +271,7 @@ section[data-testid="stSidebar"] .stRadio label:hover {
 
 
 # ─────────────────────────────────────────────
-# HELPERS
+# HELPERS (Fonctions utilitaires et DRY)
 # ─────────────────────────────────────────────
 def valid_email(email: str) -> bool:
     return bool(re.match(r"[^@\s]+@[^@\s]+\.[^@\s]+", email))
@@ -260,29 +280,72 @@ def fcfa(amount: int) -> str:
     """Format a number as FCFA currency."""
     return f"{amount:,}".replace(",", " ") + " FCFA"
 
+def render_section_header(title: str, subtitle: str = ""):
+    """Affiche un en-tête de section standardisé."""
+    st.markdown(f"<div class='section-title'>{title}</div>", unsafe_allow_html=True)
+    st.markdown("<div class='divider'></div>", unsafe_allow_html=True)
+    if subtitle:
+        st.markdown(f"<div class='section-sub'>{subtitle}</div>", unsafe_allow_html=True)
+
+def render_card(icon: str, title: str, desc: str, price: str):
+    """Affiche une carte service."""
+    st.markdown(f"""
+    <div class="card">
+        <div style='font-size:2rem;margin-bottom:10px'>{icon}</div>
+        <h3>{title}</h3>
+        <p>{desc}</p>
+        <p style='margin-top:14px;font-weight:700;color:#0284C7'>Dès {price}</p>
+    </div><br>
+    """, unsafe_allow_html=True)
+
+def validate_contact_form(name, phone, email, msg):
+    """Valide et retourne les erreurs."""
+    errors = []
+    if not name.strip():
+        errors.append("Le nom est requis.")
+    if not phone.strip() or not phone.replace(" ", "").replace("+", "").isdigit():
+        errors.append("Téléphone invalide.")
+    if not email.strip() or not valid_email(email):
+        errors.append("E-mail invalide.")
+    if not msg.strip():
+        errors.append("Le message est requis.")
+    return errors
+
+def generate_whatsapp_link(message: str, phone: str = WHATSAPP_NUMBER) -> str:
+    """Génère un lien WhatsApp sécurisé."""
+    encoded = urllib.parse.quote(message)
+    return f"https://wa.me/{phone}?text={encoded}"
+
 
 # ─────────────────────────────────────────────
-# DATA
+# DATA & CACHING
 # ─────────────────────────────────────────────
-SERVICES = {
-    "🎨 Logo & Identité":    {"icon": "🎨", "desc": "Création complète de votre identité de marque.", "base": 60_000},
-    "🖨️ Flyer / Affiche":    {"icon": "🖨️", "desc": "Supports print impactants pour vos campagnes.",  "base": 25_000},
-    "🌐 Site web":            {"icon": "🌐", "desc": "Site vitrine ou e-commerce clé en main.",        "base": 200_000},
-    "📦 Packaging":           {"icon": "📦", "desc": "Design d'emballage produit attractif et pro.",   "base": 90_000},
-    "📱 Social Media Kit":    {"icon": "📱", "desc": "Pack visuel complet pour vos réseaux sociaux.",  "base": 45_000},
-    "🚗 Branding Véhicule":   {"icon": "🚗", "desc": "Covering et marquage graphique de véhicule.",   "base": 120_000},
-    "🏢 Signalétique":        {"icon": "🏢", "desc": "Panneaux, enseignes et supports événementiels.", "base": 75_000},
-    "📊 Présentation PPT":    {"icon": "📊", "desc": "Slides professionnelles pour vos pitchs.",       "base": 35_000},
-}
+@st.cache_data
+def load_services():
+    return {
+        "🎨 Logo & Identité":    {"icon": "🎨", "desc": "Création complète de votre identité de marque.", "base": 60_000},
+        "🖨️ Flyer / Affiche":    {"icon": "🖨️", "desc": "Supports print impactants pour vos campagnes.",  "base": 25_000},
+        "🌐 Site web":            {"icon": "🌐", "desc": "Site vitrine ou e-commerce clé en main.",        "base": 200_000},
+        "📦 Packaging":           {"icon": "📦", "desc": "Design d'emballage produit attractif et pro.",   "base": 90_000},
+        "📱 Social Media Kit":    {"icon": "📱", "desc": "Pack visuel complet pour vos réseaux sociaux.",  "base": 45_000},
+        "🚗 Branding Véhicule":   {"icon": "🚗", "desc": "Covering et marquage graphique de véhicule.",   "base": 120_000},
+        "🏢 Signalétique":        {"icon": "🏢", "desc": "Panneaux, enseignes et supports événementiels.", "base": 75_000},
+        "📊 Présentation PPT":    {"icon": "📊", "desc": "Slides professionnelles pour vos pitchs.",       "base": 35_000},
+    }
 
-PROJECTS = [
-    {"title": "Identité visuelle — Savanna Grill",  "image": "https://images.unsplash.com/photo-1552566626-52f8b828add9?w=600",  "category": "Branding",      "client": "Savanna Grill", "desc": "Logo + charte graphique complète.",  "result": "Image forte & mémorable"},
-    {"title": "Flyer Black Friday",                  "image": "https://images.unsplash.com/photo-1607082349566-187342175e2f?w=600",  "category": "Print",         "client": "Dakar Shop",    "desc": "Flyer promotionnel haute impact.",    "result": "+60 % de trafic en magasin"},
-    {"title": "Instagram Branding",                  "image": "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=600",  "category": "Social Media",  "client": "Queen Style",   "desc": "Feed harmonisé + templates Reels.",  "result": "×3 sur l'engagement"},
-    {"title": "Packaging Jus Naturel",               "image": "https://images.unsplash.com/photo-1600271886742-f049cd451bba?w=600",  "category": "Packaging",     "client": "Fresh Juice",   "desc": "Étiquette produit bio & colorée.",   "result": "Mise en rayon réussie"},
-    {"title": "Signalétique Event Dakar",            "image": "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=600",  "category": "Signalétique",  "client": "Dakar Event",   "desc": "Supports visuels pour 3 000 pers.", "result": "Visibilité maximale"},
-    {"title": "Logo TechNova",                       "image": "https://images.unsplash.com/photo-1559028012-481c04fa702d?w=600",  "category": "Logo",          "client": "TechNova",      "desc": "Logo minimaliste + motion design.",  "result": "Image tech & moderne"},
-]
+@st.cache_data
+def load_projects():
+    return [
+        {"title": "Identité visuelle — Savanna Grill",  "image": "https://images.unsplash.com/photo-1552566626-52f8b828add9?w=600",  "category": "Branding",      "client": "Savanna Grill", "desc": "Logo + charte graphique complète.",  "result": "Image forte & mémorable"},
+        {"title": "Flyer Black Friday",                  "image": "https://images.unsplash.com/photo-1607082349566-187342175e2f?w=600",  "category": "Print",         "client": "Dakar Shop",    "desc": "Flyer promotionnel haute impact.",    "result": "+60 % de trafic en magasin"},
+        {"title": "Instagram Branding",                  "image": "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=600",  "category": "Social Media",  "client": "Queen Style",   "desc": "Feed harmonisé + templates Reels.",  "result": "×3 sur l'engagement"},
+        {"title": "Packaging Jus Naturel",               "image": "https://images.unsplash.com/photo-1600271886742-f049cd451bba?w=600",  "category": "Packaging",     "client": "Fresh Juice",   "desc": "Étiquette produit bio & colorée.",   "result": "Mise en rayon réussie"},
+        {"title": "Signalétique Event Dakar",            "image": "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=600",  "category": "Signalétique",  "client": "Dakar Event",   "desc": "Supports visuels pour 3 000 pers.", "result": "Visibilité maximale"},
+        {"title": "Logo TechNova",                       "image": "https://images.unsplash.com/photo-1559028012-481c04fa702d?w=600",  "category": "Logo",          "client": "TechNova",      "desc": "Logo minimaliste + motion design.",  "result": "Image tech & moderne"},
+    ]
+
+SERVICES = load_services()
+PROJECTS = load_projects()
 
 TESTIMONIALS = [
     {"text": "Chic Chic ULTRA a transformé notre marque en quelques jours. Résultat au-delà de nos attentes !",  "author": "Aminata D. — Queen Style"},
@@ -318,9 +381,9 @@ with st.sidebar:
     )
 
     st.markdown("---")
-    st.markdown("**📍 Dakar, Sénégal**")
-    st.markdown("📲 [WhatsApp](https://wa.me/221770000000)")
-    st.markdown("📧 contact@chicchic.sn")
+    st.markdown(f"**📍 {LOCATION}**")
+    st.markdown(f"📲 [WhatsApp](https://wa.me/{WHATSAPP_NUMBER})")
+    st.markdown(f"📧 {EMAIL}")
     st.markdown("🕐 Lun–Sam · 8h–20h")
     st.markdown("---")
     st.markdown("<div style='font-size:0.75rem;opacity:0.4;'>© 2026 Chic Chic ULTRA</div>", unsafe_allow_html=True)
@@ -330,8 +393,6 @@ with st.sidebar:
 # PAGE : ACCUEIL
 # ─────────────────────────────────────────────
 if menu == "🏠 Accueil":
-
-    # Hero
     st.markdown("""
     <div class="hero">
         <h1>L'agence créative<br>qui fait la différence ✦</h1>
@@ -340,7 +401,6 @@ if menu == "🏠 Accueil":
     </div>
     """, unsafe_allow_html=True)
 
-    # CTA rapide
     c1, c2, c3 = st.columns([1, 1, 2])
     with c1:
         if st.button("💰 Obtenir un devis"):
@@ -351,9 +411,8 @@ if menu == "🏠 Accueil":
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # Chiffres clés
-    st.markdown("<div class='section-title'>En chiffres</div><div class='divider'></div>", unsafe_allow_html=True)
-    cols = st.columns(4)
+    render_section_header("En chiffres")
+    cols = st.columns(4 if st.session_state.get("wide_mode", True) else 2)
     for col, s in zip(cols, STATS):
         with col:
             st.markdown(f"""
@@ -365,9 +424,8 @@ if menu == "🏠 Accueil":
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # Témoignages
-    st.markdown("<div class='section-title'>Ils nous font confiance</div><div class='divider'></div>", unsafe_allow_html=True)
-    cols = st.columns(3)
+    render_section_header("Ils nous font confiance")
+    cols = st.columns(3 if st.session_state.get("wide_mode", True) else 1)
     for col, t in zip(cols, TESTIMONIALS):
         with col:
             st.markdown(f"""
@@ -377,37 +435,22 @@ if menu == "🏠 Accueil":
             </div>
             """, unsafe_allow_html=True)
 
-
 # ─────────────────────────────────────────────
 # PAGE : SERVICES
 # ─────────────────────────────────────────────
 elif menu == "⚙️ Services":
-    st.markdown("<div class='section-title'>Nos Services</div>", unsafe_allow_html=True)
-    st.markdown("<div class='divider'></div>", unsafe_allow_html=True)
-    st.markdown("<div class='section-sub'>Des solutions créatives complètes pour booster votre image de marque.</div>", unsafe_allow_html=True)
+    render_section_header("Nos Services", "Des solutions créatives complètes pour booster votre image de marque.")
 
-    cols = st.columns(3)
+    cols = st.columns([1, 1, 1] if st.session_state.get("wide_mode", True) else [1])
     for i, (name, info) in enumerate(SERVICES.items()):
-        with cols[i % 3]:
-            st.markdown(f"""
-            <div class="card">
-                <div style='font-size:2rem;margin-bottom:10px'>{info['icon']}</div>
-                <h3>{name.split(' ', 1)[1]}</h3>
-                <p>{info['desc']}</p>
-                <p style='margin-top:14px;font-weight:700;color:#0284C7'>
-                    Dès {fcfa(info['base'])}
-                </p>
-            </div><br>
-            """, unsafe_allow_html=True)
-
+        with cols[i % len(cols)]:
+            render_card(info['icon'], name.split(' ', 1)[1], info['desc'], fcfa(info['base']))
 
 # ─────────────────────────────────────────────
 # PAGE : DEVIS
 # ─────────────────────────────────────────────
 elif menu == "💰 Devis":
-    st.markdown("<div class='section-title'>Devis Instantané</div>", unsafe_allow_html=True)
-    st.markdown("<div class='divider'></div>", unsafe_allow_html=True)
-    st.markdown("<div class='section-sub'>Configurez votre projet et obtenez une estimation en temps réel.</div>", unsafe_allow_html=True)
+    render_section_header("Devis Instantané", "Configurez votre projet et obtenez une estimation en temps réel.")
 
     col_form, col_result = st.columns([3, 2])
 
@@ -428,6 +471,7 @@ elif menu == "💰 Devis":
             ["PDF", "PNG/JPG", "SVG (vectoriel)", "Fichiers sources (AI/PSD)", "Pack réseaux sociaux"],
             default=["PDF", "PNG/JPG"],
         )
+        # Liaison avec st.session_state via la clé (key)
         st.text_input("👤 Votre nom (optionnel)", key="devis_nom")
         st.text_area("📝 Brève description du projet", height=100, key="devis_desc",
                      placeholder="Ex : Logo pour une boutique de mode féminine à Dakar…")
@@ -448,6 +492,7 @@ elif menu == "💰 Devis":
         if "Pack réseaux sociaux"      in format_livraison: mult_formats += 0.10
 
         total = int(base * mult_urgence * mult_revisions * mult_formats)
+        logger.info(f"Devis généré : {total} FCFA pour {service_choice}")
 
         st.markdown(f"""
         <div class="price-box">
@@ -461,7 +506,6 @@ elif menu == "💰 Devis":
 
         st.markdown("<br>", unsafe_allow_html=True)
 
-        # Récapitulatif
         with st.expander("📋 Voir le récapitulatif"):
             st.write(f"**Service :** {service_choice}")
             st.write(f"**Base :** {fcfa(base)}")
@@ -472,33 +516,30 @@ elif menu == "💰 Devis":
 
         if st.button("📩 Envoyer ce devis par WhatsApp"):
             msg = (
-                f"Bonjour Chic Chic ULTRA !%0A"
-                f"Service : {service_choice}%0A"
-                f"Délai : {urgence}%0A"
-                f"Révisions : {revisions}%0A"
-                f"Formats : {', '.join(format_livraison)}%0A"
-                f"Budget estimé : {fcfa(total)}"
+                f"Bonjour Chic Chic ULTRA !\n\n"
+                f"📌 Service : {service_choice}\n"
+                f"⏱️ Délai : {urgence}\n"
+                f"🔁 Révisions : {revisions}\n"
+                f"📂 Formats : {', '.join(format_livraison)}\n\n"
+                f"💰 Budget estimé : {fcfa(total)}"
             )
-            wa_link = f"https://wa.me/221770000000?text={msg}"
-            st.markdown(f"[👉 Ouvrir WhatsApp]({wa_link})", unsafe_allow_html=True)
-
+            wa_link = generate_whatsapp_link(msg)
+            st.markdown(f"[👉 Cliquez ici pour ouvrir WhatsApp]({wa_link})", unsafe_allow_html=True)
 
 # ─────────────────────────────────────────────
 # PAGE : PORTFOLIO
 # ─────────────────────────────────────────────
 elif menu == "🗂️ Portfolio":
-    st.markdown("<div class='section-title'>Nos Réalisations</div>", unsafe_allow_html=True)
-    st.markdown("<div class='divider'></div>", unsafe_allow_html=True)
-    st.markdown("<div class='section-sub'>Découvrez quelques projets qui illustrent notre savoir-faire.</div>", unsafe_allow_html=True)
+    render_section_header("Nos Réalisations", "Découvrez quelques projets qui illustrent notre savoir-faire.")
 
     categories = ["Tous"] + sorted(set(p["category"] for p in PROJECTS))
     choice = st.pills("Filtrer par catégorie", categories, default="Tous")
 
     filtered = PROJECTS if choice == "Tous" else [p for p in PROJECTS if p["category"] == choice]
 
-    cols = st.columns(3)
+    cols = st.columns([1, 1, 1] if st.session_state.get("wide_mode", True) else [1])
     for i, p in enumerate(filtered):
-        with cols[i % 3]:
+        with cols[i % len(cols)]:
             st.image(p["image"], use_container_width=True)
             st.markdown(f"""
             <div class="card" style='margin-top:0;border-radius:0 0 {12}px {12}px;'>
@@ -510,19 +551,16 @@ elif menu == "🗂️ Portfolio":
             </div><br>
             """, unsafe_allow_html=True)
 
-
 # ─────────────────────────────────────────────
 # PAGE : CONTACT
 # ─────────────────────────────────────────────
 elif menu == "✉️ Contact":
-    st.markdown("<div class='section-title'>Parlons de votre projet</div>", unsafe_allow_html=True)
-    st.markdown("<div class='divider'></div>", unsafe_allow_html=True)
-    st.markdown("<div class='section-sub'>Remplissez le formulaire ci-dessous, nous vous répondons sous 24 h.</div>", unsafe_allow_html=True)
+    render_section_header("Parlons de votre projet", "Remplissez le formulaire ci-dessous, nous vous répondons sous 24 h.")
 
     col_form, col_info = st.columns([3, 2])
 
     with col_form:
-        with st.form("contact_form", clear_on_submit=True):
+        with st.form("contact_form", clear_on_submit=False):
             c1, c2 = st.columns(2)
             with c1:
                 name = st.text_input("👤 Nom complet *")
@@ -530,68 +568,57 @@ elif menu == "✉️ Contact":
                 phone = st.text_input("📲 Téléphone *")
 
             email = st.text_input("📧 Adresse e-mail *")
-
             service_contact = st.selectbox("🎯 Service souhaité", ["— Sélectionner —"] + list(SERVICES.keys()))
-
             budget = st.select_slider(
                 "💰 Budget estimé",
                 options=["< 25 000 FCFA", "25–75 k FCFA", "75–200 k FCFA", "> 200 k FCFA"],
             )
-
-            msg = st.text_area("💬 Décrivez votre projet *", height=130,
-                               placeholder="Parlez-nous de votre activité, vos objectifs…")
-
+            msg = st.text_area("💬 Décrivez votre projet *", height=130, placeholder="Parlez-nous de votre activité, vos objectifs…")
             fichier = st.file_uploader("📎 Joindre un fichier (optionnel)", type=["pdf", "png", "jpg", "docx"])
-
+            
             send = st.form_submit_button("🚀 Envoyer le message")
 
             if send:
-                errors = []
-                if not name.strip():   errors.append("Le nom est requis.")
-                if not phone.strip():  errors.append("Le téléphone est requis.")
-                if not email.strip():  errors.append("L'e-mail est requis.")
-                elif not valid_email(email): errors.append("L'adresse e-mail est invalide.")
-                if not msg.strip():    errors.append("Le message est requis.")
-
+                errors = validate_contact_form(name, phone, email, msg)
                 if errors:
                     for e in errors:
                         st.error(e)
                 else:
+                    logger.info(f"Nouveau message de {name} ({email})")
                     st.success("✅ Message envoyé ! Nous vous contacterons dans les 24 h.")
                     st.balloons()
 
     with col_info:
-        st.markdown("""
+        st.markdown(f"""
         <div class="card">
             <h3>📍 Nous trouver</h3>
-            <p style='margin-top:12px'>Dakar, Sénégal<br>Plateau – Centre Ville</p>
+            <p style='margin-top:12px'>{LOCATION}<br>Plateau – Centre Ville</p>
 
             <h3 style='margin-top:24px'>🕐 Horaires</h3>
             <p>Lundi – Samedi<br>08h00 – 20h00</p>
 
             <h3 style='margin-top:24px'>📲 Contact direct</h3>
-            <p><a href='https://wa.me/221770000000' style='color:#38BDF8;font-weight:700;text-decoration:none'>
+            <p><a href='https://wa.me/{WHATSAPP_NUMBER}' style='color:#38BDF8;font-weight:700;text-decoration:none'>
                 WhatsApp →
             </a></p>
-            <p style='margin-top:8px'><a href='mailto:contact@chicchic.sn' style='color:#0284C7;font-weight:700;text-decoration:none'>
-                contact@chicchic.sn →
+            <p style='margin-top:8px'><a href='mailto:{EMAIL}' style='color:#0284C7;font-weight:700;text-decoration:none'>
+                {EMAIL} →
             </a></p>
         </div>
         """, unsafe_allow_html=True)
 
-
 # ─────────────────────────────────────────────
 # FOOTER
 # ─────────────────────────────────────────────
-st.markdown("""
+st.markdown(f"""
 <div class="footer">
     <div>
         <div class="brand">✦ Chic Chic ULTRA</div>
-        <div style='font-size:0.8rem;margin-top:4px;opacity:0.5'>Agence Créative — Dakar, Sénégal</div>
+        <div style='font-size:0.8rem;margin-top:4px;opacity:0.5'>Agence Créative — {LOCATION}</div>
     </div>
     <div style='font-size:0.85rem'>
-        <a href='https://wa.me/221770000000'>WhatsApp</a> &nbsp;·&nbsp;
-        <a href='mailto:contact@chicchic.sn'>Email</a> &nbsp;·&nbsp;
+        <a href='https://wa.me/{WHATSAPP_NUMBER}'>WhatsApp</a> &nbsp;·&nbsp;
+        <a href='mailto:{EMAIL}'>Email</a> &nbsp;·&nbsp;
         <a href='#'>Instagram</a> &nbsp;·&nbsp;
         <a href='#'>Facebook</a>
     </div>
