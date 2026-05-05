@@ -20,14 +20,14 @@ st.markdown("""
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500&display=swap');
 
 :root {
-    --rouge:   #E30613;
-    --bleu:    #0020C2;
-    --noir:    #0A0A0A;
-    --blanc:   #FAFAFA;
-    --gris:    #F2F2F0;
-    --muted:   #888888;
+    --rouge:   #38BDF8;
+    --bleu:    #0284C7;
+    --noir:    #0C4A6E;
+    --blanc:   #FFFFFF;
+    --gris:    #E0F2FE;
+    --muted:   #64A4C4;
     --radius:  14px;
-    --shadow:  0 8px 30px rgba(0,0,0,0.09);
+    --shadow:  0 8px 30px rgba(2,132,199,0.12);
 }
 
 html, body, [class*="css"] {
@@ -46,6 +46,7 @@ h1, h2, h3 {
 section[data-testid="stSidebar"] {
     background: var(--noir) !important;
     border-right: 3px solid var(--rouge);
+    background: linear-gradient(180deg, #0C4A6E 0%, #075985 100%) !important;
 }
 section[data-testid="stSidebar"] * {
     color: var(--blanc) !important;
@@ -77,7 +78,7 @@ section[data-testid="stSidebar"] .stRadio label:hover {
 }
 .stButton > button:hover {
     transform: translateY(-3px);
-    box-shadow: 0 12px 28px rgba(227,6,19,0.35);
+    box-shadow: 0 12px 28px rgba(56,189,248,0.45);
 }
 
 /* ── Cards ─────────────────────────────────── */
@@ -100,7 +101,7 @@ section[data-testid="stSidebar"] .stRadio label:hover {
 
 /* ── Hero ───────────────────────────────────── */
 .hero {
-    background: linear-gradient(135deg, var(--noir) 60%, #1a1a2e);
+    background: linear-gradient(135deg, #0C4A6E 0%, #075985 60%, #0369A1 100%);
     color: #fff;
     border-radius: 20px;
     padding: 64px 48px;
@@ -114,7 +115,7 @@ section[data-testid="stSidebar"] .stRadio label:hover {
     top: -60px; right: -60px;
     width: 260px; height: 260px;
     border-radius: 50%;
-    background: radial-gradient(circle, rgba(227,6,19,0.35), transparent 70%);
+    background: radial-gradient(circle, rgba(56,189,248,0.40), transparent 70%);
 }
 .hero::after {
     content: '';
@@ -122,7 +123,7 @@ section[data-testid="stSidebar"] .stRadio label:hover {
     bottom: -40px; left: -40px;
     width: 200px; height: 200px;
     border-radius: 50%;
-    background: radial-gradient(circle, rgba(0,32,194,0.30), transparent 70%);
+    background: radial-gradient(circle, rgba(186,230,253,0.25), transparent 70%);
 }
 .hero h1 { font-size: 3rem; margin-bottom: 12px; color: #fff; }
 .hero p  { font-size: 1.15rem; opacity: 0.75; max-width: 480px; }
@@ -222,13 +223,13 @@ section[data-testid="stSidebar"] .stRadio label:hover {
 }
 .stTextInput input:focus, .stTextArea textarea:focus {
     border-color: var(--rouge) !important;
-    box-shadow: 0 0 0 3px rgba(227,6,19,0.10) !important;
+    box-shadow: 0 0 0 3px rgba(56,189,248,0.20) !important;
 }
 
 /* ── Footer ──────────────────────────────────── */
 .footer {
-    background: var(--noir);
-    color: #aaa;
+    background: linear-gradient(135deg, #0C4A6E, #075985);
+    color: #BAE6FD;
     border-radius: var(--radius);
     padding: 32px 40px;
     margin-top: 60px;
@@ -238,7 +239,7 @@ section[data-testid="stSidebar"] .stRadio label:hover {
     flex-wrap: wrap;
     gap: 16px;
 }
-.footer a { color: var(--rouge); text-decoration: none; }
+.footer a { color: #38BDF8; text-decoration: none; }
 .footer .brand {
     font-family: 'Syne', sans-serif;
     font-size: 1.3rem;
@@ -304,7 +305,7 @@ with st.sidebar:
     st.markdown("""
     <div style='text-align:center;padding:16px 0 24px'>
         <div style='font-family:Syne,sans-serif;font-size:1.5rem;font-weight:800;color:#fff;letter-spacing:-0.02em;'>
-            ✦ Chic Chic<br><span style='color:#E30613'>ULTRA</span>
+            ✦ Chic Chic<br><span style='color:#38BDF8'>ULTRA</span>
         </div>
         <div style='font-size:0.78rem;opacity:0.5;margin-top:4px;'>AGENCE CRÉATIVE</div>
     </div>
@@ -393,7 +394,7 @@ elif menu == "⚙️ Services":
                 <div style='font-size:2rem;margin-bottom:10px'>{info['icon']}</div>
                 <h3>{name.split(' ', 1)[1]}</h3>
                 <p>{info['desc']}</p>
-                <p style='margin-top:14px;font-weight:700;color:#E30613'>
+                <p style='margin-top:14px;font-weight:700;color:#0284C7'>
                     Dès {fcfa(info['base'])}
                 </p>
             </div><br>
@@ -505,7 +506,7 @@ elif menu == "🗂️ Portfolio":
                 <h3 style='margin:6px 0 4px'>{p['title']}</h3>
                 <p><strong>Client :</strong> {p['client']}</p>
                 <p style='margin-top:6px'>{p['desc']}</p>
-                <p style='margin-top:10px;font-weight:700;color:#E30613'>✓ {p['result']}</p>
+                <p style='margin-top:10px;font-weight:700;color:#0284C7'>✓ {p['result']}</p>
             </div><br>
             """, unsafe_allow_html=True)
 
@@ -569,10 +570,10 @@ elif menu == "✉️ Contact":
             <p>Lundi – Samedi<br>08h00 – 20h00</p>
 
             <h3 style='margin-top:24px'>📲 Contact direct</h3>
-            <p><a href='https://wa.me/221770000000' style='color:#E30613;font-weight:700;text-decoration:none'>
+            <p><a href='https://wa.me/221770000000' style='color:#38BDF8;font-weight:700;text-decoration:none'>
                 WhatsApp →
             </a></p>
-            <p style='margin-top:8px'><a href='mailto:contact@chicchic.sn' style='color:#0020C2;font-weight:700;text-decoration:none'>
+            <p style='margin-top:8px'><a href='mailto:contact@chicchic.sn' style='color:#0284C7;font-weight:700;text-decoration:none'>
                 contact@chicchic.sn →
             </a></p>
         </div>
