@@ -8,7 +8,7 @@ st.set_page_config(
     layout="wide",
 )
 
-# 2. STYLE CSS (Menu en Bas & Design Original)
+# 2. STYLE CSS (Menu Haut avec design "Stat Boxes")
 st.markdown("""
     <style>
     footer {visibility: hidden;}
@@ -33,30 +33,44 @@ st.markdown("""
         color: var(--dark);
     }
 
-    /* --- BARRE DE NAVIGATION EN BAS --- */
-    .nav-bottom {
+    /* --- BARRE DE NAVIGATION EN HAUT --- */
+    .nav-top {
         position: fixed;
-        bottom: 0;
+        top: 0;
         left: 0;
         width: 100%;
         background-color: #0C4A6E;
-        padding: 10px 0;
+        padding: 15px 0;
         z-index: 9999;
-        border-top: 3px solid #38BDF8;
-        box-shadow: 0 -5px 15px rgba(0,0,0,0.2);
+        border-bottom: 3px solid #38BDF8;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
     }
 
-    /* Style des boutons Streamlit pour le menu */
+    /* Style des boutons du menu inspiré des Stat Boxes */
     div.stButton > button {
-        background-color: #38BDF8 !important;
-        color: white !important;
-        border: none !important;
-        border-radius: 8px !important;
-        font-weight: bold !important;
+        background-color: var(--bg-alt) !important; /* Fond bleu très clair comme les stats */
+        color: var(--secondary) !important;       /* Texte bleu foncé comme les stats */
+        border: 1px solid #E0F2FE !important;
+        border-radius: 12px !important;
+        font-family: 'Syne', sans-serif !important;
+        font-weight: 800 !important;
+        font-size: 0.9rem !important;
         width: 100% !important;
+        transition: 0.3s !important;
+        height: 45px !important;
     }
 
-    /* Accueil - Hero Section Originale */
+    div.stButton > button:hover {
+        background-color: var(--primary) !important;
+        color: white !important;
+        transform: translateY(-2px);
+    }
+
+    .main-content {
+        margin-top: 100px;
+    }
+
+    /* Hero Section */
     .hero {
         background: linear-gradient(135deg, #0C4A6E 0%, #075985 50%, #0369A1 100%);
         color: #fff;
@@ -69,7 +83,6 @@ st.markdown("""
         font-family: 'Syne', sans-serif; 
         font-size: 3.5rem; 
         font-weight: 800; 
-        margin-bottom: 20px; 
         line-height: 1.1;
         color: white;
     }
@@ -80,14 +93,15 @@ st.markdown("""
         padding: 35px;
         box-shadow: 0 10px 30px rgba(0,0,0,0.05);
         border: 1px solid #f0f9ff;
-        margin-bottom: 20px;
     }
 
+    /* Les Stat Boxes originales */
     .stat-box {
         background: var(--bg-alt);
         border-radius: 15px;
         padding: 20px;
         text-align: center;
+        border: 1px solid #E0F2FE;
     }
     .stat-num { font-family: 'Syne', sans-serif; font-size: 2.2rem; font-weight: 800; color: var(--secondary); display: block; }
     
@@ -101,11 +115,6 @@ st.markdown("""
         display: block;
         text-align: center;
     }
-
-    /* Padding pour ne pas cacher le contenu derrière le menu du bas */
-    .content-area {
-        padding-bottom: 100px;
-    }
     </style>
 """, unsafe_allow_html=True)
 
@@ -116,8 +125,18 @@ if 'page' not in st.session_state:
 def set_page(name):
     st.session_state.page = name
 
-# 4. CONTENU (DANS UNE DIV POUR LE PADDING)
-st.markdown('<div class="content-area">', unsafe_allow_html=True)
+# 4. BARRE DE NAVIGATION EN HAUT
+st.markdown('<div class="nav-top">', unsafe_allow_html=True)
+c1, c2, c3, c4, c5 = st.columns(5)
+with c1: st.button("ACCUEIL", on_click=set_page, args=("🏠 ACCUEIL",))
+with c2: st.button("SERVICES", on_click=set_page, args=("⚙️ SERVICES",))
+with c3: st.button("PROJETS", on_click=set_page, args=("📸 RÉALISATIONS",))
+with c4: st.button("DEVIS", on_click=set_page, args=("📅 DEVIS EXPRESS",))
+with c5: st.button("CONTACT", on_click=set_page, args=("✉️ CONTACT",))
+st.markdown('</div>', unsafe_allow_html=True)
+
+# 5. CONTENU PRINCIPAL
+st.markdown('<div class="main-content">', unsafe_allow_html=True)
 
 menu = st.session_state.page
 
@@ -145,7 +164,7 @@ elif menu == "⚙️ SERVICES":
     cols = st.columns(2)
     for i, (icon, title, desc) in enumerate(services):
         with cols[i % 2]:
-            st.markdown(f'<div class="card"><div style="font-size:2.5rem">{icon}</div><h3>{title}</h3><p>{desc}</p></div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="card"><div style="font-size:2.5rem">{icon}</div><h3>{title}</h3><p>{desc}</p></div><br>', unsafe_allow_html=True)
 
 elif menu == "📸 RÉALISATIONS":
     st.markdown("<h2 style='font-family:Syne; font-size:2.5rem'>Portfolio</h2><br>", unsafe_allow_html=True)
@@ -172,14 +191,4 @@ elif menu == "✉️ CONTACT":
     st.markdown("<h2 style='font-family:Syne;'>Contact</h2>", unsafe_allow_html=True)
     st.markdown(f'<div class="card">📍 Dakar, Sénégal<br>📧 contact@chic-graphic.sn<br>📞 +221 77 861 59 00</div>', unsafe_allow_html=True)
 
-st.markdown('</div>', unsafe_allow_html=True)
-
-# 5. BARRE DE NAVIGATION FIXÉE EN BAS
-st.markdown('<div class="nav-bottom">', unsafe_allow_html=True)
-c1, c2, c3, c4, c5 = st.columns(5)
-with c1: st.button("ACCUEIL", on_click=set_page, args=("🏠 ACCUEIL",))
-with c2: st.button("SERVICES", on_click=set_page, args=("⚙️ SERVICES",))
-with c3: st.button("PROJETS", on_click=set_page, args=("📸 RÉALISATIONS",))
-with c4: st.button("DEVIS", on_click=set_page, args=("📅 DEVIS EXPRESS",))
-with c5: st.button("CONTACT", on_click=set_page, args=("✉️ CONTACT",))
 st.markdown('</div>', unsafe_allow_html=True)
