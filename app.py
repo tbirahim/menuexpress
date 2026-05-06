@@ -6,17 +6,23 @@ st.set_page_config(
     page_title="CHIC Graphic & Print | Agence Créative",
     page_icon="🎨",
     layout="wide",
-    initial_sidebar_state="expanded", # Force l'ouverture au chargement
+    initial_sidebar_state="expanded", # Le menu est ouvert au départ
 )
 
-# 2. STYLE CSS AVANCÉ
+# 2. STYLE CSS (Réajusté pour laisser apparaître le bouton Menu)
 st.markdown("""
     <style>
-    /* Nettoyage des éléments par défaut */
+    /* On ne cache plus l'en-tête (Header) pour laisser le bouton de menu (les 3 traits) visible */
     footer {visibility: hidden;}
     div[data-testid="stToolbar"] {display: none;}
-    header {visibility: hidden;}
     
+    /* On stylise le bouton de menu pour qu'il soit plus visible */
+    button[kind="headerNoPadding"] {
+        background-color: #0C4A6E !important;
+        color: white !important;
+        border-radius: 5px;
+    }
+
     @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500&display=swap');
 
     :root {
@@ -34,7 +40,6 @@ st.markdown("""
         border-right: 4px solid var(--primary);
     }
     
-    /* Force la couleur blanche pour tout le texte du menu */
     section[data-testid="stSidebar"] * { 
         color: white !important; 
     }
@@ -62,9 +67,7 @@ st.markdown("""
         line-height: 1.1;
         color: white;
     }
-    .hero p { font-size: 1.2rem; opacity: 0.9; max-width: 650px; }
 
-    /* Cards */
     .card {
         background: #fff;
         border-radius: var(--radius);
@@ -74,9 +77,7 @@ st.markdown("""
         transition: 0.3s;
         height: 100%;
     }
-    .card:hover { transform: translateY(-10px); border-color: var(--primary); }
 
-    /* Stats */
     .stat-box {
         background: white;
         border-radius: 15px;
@@ -102,7 +103,7 @@ BRAND_NAME = "CHIC Graphic & Print"
 WHATSAPP_NUMBER = "221778615900" 
 LOCATION = "Dakar, Sénégal"
 
-# 4. BARRE LATÉRALE
+# 4. BARRE LATÉRALE (Contrôlable par l'utilisateur)
 with st.sidebar:
     st.markdown(f"""
         <div style='text-align:center; padding:20px 0'>
@@ -129,7 +130,7 @@ if menu == "🏠 ACCUEIL":
         col.markdown(f"<div class='stat-box'><span class='stat-num'>{val}</span><span style='font-weight:600; color:#64A4C4'>{label}</span></div>", unsafe_allow_html=True)
 
 elif menu == "⚙️ SERVICES":
-    st.markdown("<h2 style='font-size:2.5rem'>Nos Expertise</h2><br>", unsafe_allow_html=True)
+    st.markdown("<h2 style='font-size:2.5rem'>Nos Expertises</h2><br>", unsafe_allow_html=True)
     services = [
         ("🎨", "Branding", "Logos et identités visuelles."),
         ("🖨️", "Print", "Flyers, cartes et brochures."),
@@ -143,14 +144,18 @@ elif menu == "⚙️ SERVICES":
 
 elif menu == "📸 RÉALISATIONS":
     st.markdown("<h2 style='font-size:2.5rem'>Notre Portfolio</h2><br>", unsafe_allow_html=True)
+    # Liste de tes photos sur GitHub
     photos = ["photo10.jpg", "photo2.jpg", "photo3.jpg", "photo4.jpg", "photo5.jpg", 
               "photo6.jpg", "photo7.jpg", "photo8.jpg", "photo9.jpg"]
     col1, col2 = st.columns(2)
     for i, p in enumerate(photos):
-        if i % 2 == 0:
-            col1.image(p, use_container_width=True)
-        else:
-            col2.image(p, use_container_width=True)
+        try:
+            if i % 2 == 0:
+                col1.image(p, use_container_width=True)
+            else:
+                col2.image(p, use_container_width=True)
+        except:
+            st.warning(f"Image {p} non trouvée.")
 
 elif menu == "📅 DEVIS EXPRESS":
     st.markdown("<h2>Lancez votre projet</h2>", unsafe_allow_html=True)
