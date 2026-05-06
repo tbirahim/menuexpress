@@ -99,7 +99,7 @@ st.markdown("""
 
 # 2. DONNÉES ET CONSTANTES
 BRAND_NAME = "CHIC Graphic & Print"
-WHATSAPP_NUMBER = "221770000000"  # Mets ton vrai numéro ici
+WHATSAPP_NUMBER = "221778615900"  # Mets ton vrai numéro ici
 LOCATION = "Dakar, Sénégal"
 
 # 3. BARRE LATÉRALE
