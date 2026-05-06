@@ -6,213 +6,235 @@ st.set_page_config(
     page_title="CHIC Graphic & Print | Agence Créative",
     page_icon="🎨",
     layout="wide",
+    initial_sidebar_state="expanded",
 )
 
-# 2. STYLE CSS PREMIUM (Menu Haut Fixe + Boutons Bleus + Design original)
+# 2. DESIGN "CARTE BLANCHE" (CSS PERSONNALISÉ)
 st.markdown("""
     <style>
-    footer {visibility: hidden;}
-    div[data-testid="stToolbar"] {display: none;}
-    header {visibility: hidden;}
-    [data-testid="stSidebar"] {display: none;}
+    /* Importation des polices Google */
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&family=Syne:wght@700;800&display=swap');
 
-    @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500&display=swap');
-
+    /* Variables de couleurs */
     :root {
-        --primary:  #38BDF8;
-        --secondary: #0284C7;
-        --dark:     #0C4A6E;
-        --light:    #FFFFFF;
-        --bg-alt:   #E0F2FE;
-        --radius:   20px;
+        --primary: #38BDF8;
+        --dark-bg: #0F172A;
+        --sidebar-bg: #1E293B;
+        --text-main: #1E293B;
+        --text-light: #64748B;
     }
 
+    /* Nettoyage de l'interface Streamlit */
+    footer {visibility: hidden;}
+    header {visibility: hidden;}
+    div[data-testid="stToolbar"] {display: none;}
+    .block-container {padding-top: 2rem; padding-bottom: 2rem;}
+
+    /* Style global */
     html, body, [class*="css"] {
-        font-family: 'DM Sans', sans-serif;
-        background-color: white;
-        color: var(--dark);
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        color: var(--text-main);
     }
 
-    /* Barre de navigation fixe en haut */
-    .nav-container {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        background: #0C4A6E;
-        padding: 10px 0;
-        z-index: 9999;
-        border-bottom: 3px solid #38BDF8;
-        text-align: center;
+    /* BARRE LATÉRALE (SIDEBAR) */
+    [data-testid="stSidebar"] {
+        background-color: var(--sidebar-bg) !important;
+        border-right: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    [data-testid="stSidebar"] * {
+        color: #F8FAFC !important;
     }
 
-    /* --- STYLE DES BOUTONS DU MENU (BLEU) --- */
-    div.stButton > button {
-        background-color: #38BDF8 !important;
-        color: white !important;
-        border: none !important;
-        border-radius: 10px !important;
-        padding: 10px 20px !important;
-        font-weight: bold !important;
-        transition: all 0.3s ease-in-out !important;
-        width: 100% !important;
+    /* Boutons du Menu (Radio boutons cachés pour faire un menu propre) */
+    div[data-testid="stSidebarUserContent"] .stRadio > div {
+        background-color: transparent !important;
     }
 
-    div.stButton > button:hover {
-        background-color: #0284C7 !important;
-        transform: translateY(-2px) !important;
-        box-shadow: 0 5px 15px rgba(56, 189, 248, 0.4) !important;
-    }
-
-    .main-content {
-        margin-top: 100px; /* Espace pour le menu fixe */
-    }
-
-    /* Design Hero original */
-    .hero {
-        background: linear-gradient(135deg, #0C4A6E 0%, #075985 50%, #0369A1 100%);
-        color: #fff;
-        border-radius: 30px;
-        padding: 80px 50px;
-        margin-bottom: 40px;
-        box-shadow: 0 20px 40px rgba(12, 74, 110, 0.2);
-    }
-    .hero h1 { 
-        font-family: 'Syne', sans-serif; 
-        font-size: 3.5rem; 
-        font-weight: 800; 
+    /* HERO SECTION DYNAMIQUE */
+    .hero-container {
+        background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
+        padding: 100px 60px;
+        border-radius: 32px;
         color: white;
-        line-height: 1.1;
+        margin-bottom: 40px;
+        position: relative;
+        overflow: hidden;
+        border: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    .hero-container::after {
+        content: "";
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(56, 189, 248, 0.2) 0%, transparent 70%);
+        z-index: 0;
     }
 
-    .card {
-        background: #fff;
-        border-radius: var(--radius);
-        padding: 30px;
-        box-shadow: 0 10px 30px rgba(2,132,199,0.08);
-        border: 1px solid #f0f9ff;
+    .hero-title {
+        font-family: 'Syne', sans-serif;
+        font-size: 4.5rem;
+        font-weight: 800;
+        line-height: 1;
+        margin-bottom: 20px;
+        background: linear-gradient(to right, #FFFFFF, #38BDF8);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    /* CARTES DE SERVICE */
+    .service-card {
+        background: #FFFFFF;
+        border: 1px solid #F1F5F9;
+        border-radius: 24px;
+        padding: 40px;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
         height: 100%;
     }
 
-    .stat-box {
-        background: var(--bg-alt);
-        border-radius: 15px;
-        padding: 20px;
-        text-align: center;
+    .service-card:hover {
+        transform: translateY(-12px);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        border-color: var(--primary);
     }
-    .stat-num { font-family: 'Syne', sans-serif; font-size: 2.2rem; font-weight: 800; color: var(--secondary); }
 
-    /* Bouton Devis Style WhatsApp final */
-    .wa-button {
-        background-color: #25D366; /* Vert WhatsApp */
+    /* PORTFOLIO IMAGES */
+    .stImage > img {
+        border-radius: 20px;
+        transition: transform 0.6s ease;
+    }
+    .stImage > img:hover {
+        transform: scale(1.02);
+    }
+
+    /* BOUTON WHATSAPP */
+    .btn-wa {
+        background: #25D366;
         color: white !important;
-        padding: 15px 25px;
-        border-radius: 10px;
+        padding: 18px 32px;
+        border-radius: 16px;
         text-decoration: none;
-        font-weight: bold;
-        display: inline-block;
-        margin-top: 10px;
+        font-weight: 700;
+        display: block;
         text-align: center;
-        width: 100%;
-        box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
+        box-shadow: 0 10px 15px -3px rgba(37, 211, 102, 0.3);
+        transition: 0.3s;
+    }
+    .btn-wa:hover {
+        background: #1eb954;
+        transform: scale(1.02);
     }
     </style>
 """, unsafe_allow_html=True)
 
-# 3. INITIALISATION DU MENU
-if 'page' not in st.session_state:
-    st.session_state.page = "🏠 ACCUEIL"
+# 3. SIDEBAR NAVIGATION
+with st.sidebar:
+    st.markdown("""
+        <div style='padding: 20px 0; text-align: center;'>
+            <h1 style='font-family:Syne; font-size:2.2rem; margin-bottom:0;'>CHIC</h1>
+            <p style='color:#38BDF8 !important; font-weight:600; letter-spacing:2px; font-size:0.8rem; margin-top:0;'>GRAPHIC & PRINT</p>
+        </div>
+        <div style='height:2px; background:rgba(255,255,255,0.1); margin-bottom:30px;'></div>
+    """, unsafe_allow_html=True)
+    
+    menu = st.radio(
+        "NAVIGUER",
+        ["ACCUEIL", "SERVICES", "RÉALISATIONS", "DEVIS", "CONTACT"],
+        label_visibility="collapsed"
+    )
+    
+    st.markdown("""
+        <div style='position: fixed; bottom: 20px; left: 20px; font-size: 0.8rem; opacity: 0.5;'>
+            📍 Dakar, Sénégal<br>© 2026 CHIC G&P
+        </div>
+    """, unsafe_allow_html=True)
 
-def set_page(name):
-    st.session_state.page = name
-
-# 4. BARRE DE NAVIGATION (BOUTONS BLEUS)
-st.markdown('<div class="nav-container">', unsafe_allow_html=True)
-# On crée 5 colonnes pour le menu
-c1, c2, c3, c4, c5 = st.columns(5)
-with c1: st.button("ACCUEIL", on_click=set_page, args=("🏠 ACCUEIL",))
-with c2: st.button("SERVICES", on_click=set_page, args=("⚙️ SERVICES",))
-with c3: st.button("PORTFOLIO", on_click=set_page, args=("📸 RÉALISATIONS",))
-with c4: st.button("DEVIS", on_click=set_page, args=("📅 DEVIS EXPRESS",))
-with c5: st.button("CONTACT", on_click=set_page, args=("✉️ CONTACT",))
-st.markdown('</div>', unsafe_allow_html=True)
-
-st.markdown('<div class="main-content">', unsafe_allow_html=True)
-
-# 5. LOGIQUE DES PAGES
-menu = st.session_state.page
-
-if menu == "🏠 ACCUEIL":
+# 4. CONTENU DES PAGES
+if menu == "ACCUEIL":
     st.markdown(f"""
-        <div class="hero">
-            <h1>L'audace visuelle<br>au service de votre marque.</h1>
-            <p style="font-size:1.2rem; opacity:0.9;">CHIC Graphic & Print fusionne créativité et précision technique pour des solutions d'impression et de design uniques à Dakar.</p>
+        <div class="hero-container">
+            <h1 class="hero-title">On ne crée pas de<br>design. On crée de<br>l'influence.</h1>
+            <p style="font-size:1.4rem; opacity:0.8; max-width:600px; line-height:1.6;">
+                L'agence de référence à Dakar pour vos projets de branding, packaging et impression haute fidélité.
+            </p>
         </div>
     """, unsafe_allow_html=True)
     
-    c1, c2, c3, c4 = st.columns(4)
-    stats = [("100%", "Qualité HD"), ("24h", "Livraison"), ("PRO", "Design"), ("Dakar", "Local")]
-    for col, (val, label) in zip([c1, c2, c3, c4], stats):
-        col.markdown(f"<div class='stat-box'><span class='stat-num'>{val}</span><br><b>{label}</b></div>", unsafe_allow_html=True)
+    c1, c2, c3 = st.columns(3)
+    with c1: st.metric("Qualité", "ULTRA HD")
+    with c2: st.metric("Livraison", "SOUS 24H")
+    with c3: st.metric("Satisfaction", "100%")
 
-elif menu == "⚙️ SERVICES":
-    st.markdown("<h2 style='font-family:Syne; font-size:2.5rem;'>Nos Expertises</h2><br>", unsafe_allow_html=True)
-    services = [
-        ("🎨", "Branding", "Logos et identités visuelles uniques."),
-        ("🖨️", "Print", "Flyers, cartes et brochures premium."),
-        ("📦", "Packaging", "Emballages qui valorisent vos produits."),
-        ("🏢", "Signalétique", "Enseignes et habillage de vitrines.")
-    ]
-    cols = st.columns(2)
-    for i, (icon, title, desc) in enumerate(services):
-        with cols[i % 2]:
-            st.markdown(f'<div class="card"><div style="font-size:2.5rem">{icon}</div><h3>{title}</h3><p>{desc}</p></div><br>', unsafe_allow_html=True)
+elif menu == "SERVICES":
+    st.markdown("<h2 style='font-family:Syne; font-size:3rem; margin-bottom:40px;'>Nos Expertises</h2>", unsafe_allow_html=True)
+    s1, s2 = st.columns(2)
+    with s1:
+        st.markdown("""
+            <div class="service-card">
+                <span style='font-size:3rem;'>🎨</span>
+                <h3>Branding & Identité</h3>
+                <p style='color:#64748B;'>Logos, chartes graphiques et direction artistique pour marques ambitieuses.</p>
+            </div><br>
+        """, unsafe_allow_html=True)
+        st.markdown("""
+            <div class="service-card">
+                <span style='font-size:3rem;'>📦</span>
+                <h3>Packaging Design</h3>
+                <p style='color:#64748B;'>Conception d'emballages qui captivent l'œil et boostent vos ventes.</p>
+            </div>
+        """, unsafe_allow_html=True)
+    with s2:
+        st.markdown("""
+            <div class="service-card">
+                <span style='font-size:3rem;'>🖨️</span>
+                <h3>Impression Print</h3>
+                <p style='color:#64748B;'>Flyers, cartes de visite et supports marketing avec une finition irréprochable.</p>
+            </div><br>
+        """, unsafe_allow_html=True)
+        st.markdown("""
+            <div class="service-card">
+                <span style='font-size:3rem;'>🏢</span>
+                <h3>Signalétique</h3>
+                <p style='color:#64748B;'>Habillage de façades, enseignes lumineuses et décoration d'intérieur.</p>
+            </div>
+        """, unsafe_allow_html=True)
 
-elif menu == "📸 RÉALISATIONS":
-    st.markdown("<h2 style='font-family:Syne; font-size:2.5rem;'>Notre Portfolio</h2><br>", unsafe_allow_html=True)
-    # Les noms de tes photos sur GitHub
+elif menu == "RÉALISATIONS":
+    st.markdown("<h2 style='font-family:Syne; font-size:3rem;'>Portfolio</h2><br>", unsafe_allow_html=True)
     photos = ["photo10.jpg", "photo2.jpg", "photo3.jpg", "photo4.jpg", "photo5.jpg", "photo6.jpg", "photo7.jpg", "photo8.jpg", "photo9.jpg"]
-    col1, col2 = st.columns(2)
+    p1, p2 = st.columns(2)
     for i, p in enumerate(photos):
-        if i % 2 == 0: col1.image(p, use_container_width=True)
-        else: col2.image(p, use_container_width=True)
+        if i % 2 == 0: p1.image(p, use_container_width=True)
+        else: p2.image(p, use_container_width=True)
 
-elif menu == "📅 DEVIS EXPRESS":
-    st.markdown("<h2 style='font-family:Syne;'>Obtenir un Devis Gratuit</h2>", unsafe_allow_html=True)
-    with st.form("devis_form_wa"):
-        nom = st.text_input("Votre nom ou entreprise")
-        type_p = st.multiselect("Services", ["Branding", "Print", "Packaging", "Signalétique"])
-        details = st.text_area("Décrivez votre projet")
-        submit = st.form_submit_button("🚀 Générer le message WhatsApp")
-        
-        if submit:
-            if nom and type_p:
-                msg = f"Bonjour CHIC Graphic & Print, je souhaite un devis pour : {', '.join(type_p)}. Projet : {nom}. Détails : {details}"
-                whatsapp_url = f"https://wa.me/221778615900?text={urllib.parse.quote(msg)}"
-                st.success("✅ Message préparé avec succès !")
-                st.markdown(f'<a href="{whatsapp_url}" target="_blank" class="wa-button">CLIQUEZ ICI POUR ENVOYER SUR WHATSAPP</a>', unsafe_allow_html=True)
-            else:
-                st.error("⚠️ Veuillez remplir le nom et choisir au moins un service.")
+elif menu == "DEVIS":
+    st.markdown("<h2 style='font-family:Syne;'>Lancer votre projet</h2>", unsafe_allow_html=True)
+    with st.container():
+        st.markdown("<div class='service-card'>", unsafe_allow_html=True)
+        with st.form("wa_form"):
+            name = st.text_input("Nom de l'entreprise")
+            serv = st.multiselect("Service souhaité", ["Logo", "Flyer", "Packaging", "Enseigne"])
+            det = st.text_area("Détails du projet")
+            submit = st.form_submit_button("🚀 Valider la demande")
+            
+            if submit:
+                msg = f"Bonjour CHIC G&P, je souhaite un devis pour {', '.join(serv)}. Entreprise : {name}. Détails : {det}"
+                url = f"https://wa.me/221778615900?text={urllib.parse.quote(msg)}"
+                st.markdown(f'<a href="{url}" target="_blank" class="btn-wa">ENVOYER PAR WHATSAPP MAINTENANT</a>', unsafe_allow_html=True)
+        st.markdown("</div>", unsafe_allow_html=True)
 
-elif menu == "✉️ CONTACT":
-    st.markdown("<h2 style='font-family:Syne;'>Contactez-nous</h2>", unsafe_allow_html=True)
-    st.markdown(f"""
-        <div class="card">
-            <h3>Coordonnées</h3>
-            <p>📍 Dakar, Sénégal</p>
-            <p>📧 contact@chic-graphic.sn</p>
+elif menu == "CONTACT":
+    st.markdown("<h2 style='font-family:Syne;'>Parlons de vous</h2>", unsafe_allow_html=True)
+    st.info("📍 Situé à Dakar, Sénégal")
+    st.markdown("""
+        <div class="service-card">
+            <h3>Coordonnées directes</h3>
             <p>📞 +221 77 861 59 00</p>
-            <hr>
-            <p><i>Ouvert du Lundi au Samedi de 09h à 19h</i></p>
+            <p>📧 contact@chic-graphic.sn</p>
+            <p>🕒 Lun - Sam | 09:00 - 19:00</p>
         </div>
     """, unsafe_allow_html=True)
-
-st.markdown('</div>', unsafe_allow_html=True)
-
-# FOOTER
-st.markdown(f"""
-    <div style="text-align:center; padding:50px; background:#0C4A6E; color:white; border-radius:25px; margin-top:50px;">
-        <h3 style="font-family:Syne; color:white;">CHIC Graphic & Print</h3>
-        <p>© 2026 · Excellence Visuelle à Dakar · Créé avec Passion</p>
-    </div>
-""", unsafe_allow_html=True)
