@@ -9,12 +9,10 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# On cache TOUT ce qui n'est pas "Pro" (GitHub, Menu, Footer Streamlit)
+# On garde le menu (header) mais on cache le Footer Streamlit et le bouton de déploiement
 st.markdown("""
     <style>
-    #MainMenu {visibility: hidden;}
-    header {visibility: hidden;}
-    footer {visibility: hidden;}
+    /* footer {visibility: hidden;}  <- Décommente cette ligne si tu veux cacher "Made with Streamlit" en bas */
     div[data-testid="stToolbar"] {display: none;}
     .block-container {padding-top: 2rem;}
     
@@ -99,7 +97,7 @@ st.markdown("""
 
 # 2. DONNÉES ET CONSTANTES
 BRAND_NAME = "CHIC Graphic & Print"
-WHATSAPP_NUMBER = "221778615900"  # Mets ton vrai numéro ici
+WHATSAPP_NUMBER = "221778615900" 
 LOCATION = "Dakar, Sénégal"
 
 # 3. BARRE LATÉRALE
@@ -177,7 +175,7 @@ elif menu == "✉️ CONTACT":
                 <h4>Nos coordonnées</h4>
                 <p>📍 {LOCATION}</p>
                 <p>📧 contact@chic-graphic.sn</p>
-                <p>📞 +221 77 000 00 00</p>
+                <p>📞 +221 77 861 59 00</p>
             </div>
         """, unsafe_allow_html=True)
     with c2:
