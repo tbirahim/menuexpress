@@ -108,7 +108,8 @@ with st.sidebar:
         </div>
     """, unsafe_allow_html=True)
     st.markdown("---")
-    menu = st.radio("MENU", ["🏠 ACCUEIL", "⚙️ SERVICES", "📅 DEVIS EXPRESS", "✉️ CONTACT"])
+    # AJOUT DE "RÉALISATIONS" DANS LE MENU
+    menu = st.radio("MENU", ["🏠 ACCUEIL", "⚙️ SERVICES", "📸 RÉALISATIONS", "📅 DEVIS EXPRESS", "✉️ CONTACT"])
     st.markdown("---")
     st.markdown(f"📍 {LOCATION}")
 
@@ -148,6 +149,41 @@ elif menu == "⚙️ SERVICES":
                     <p style="color:#64A4C4; font-size:0.95rem">{desc}</p>
                 </div><br>
             """, unsafe_allow_html=True)
+
+# ---- NOUVELLE PAGE : RÉALISATIONS ----
+elif menu == "📸 RÉALISATIONS":
+    st.markdown("<h2 style='font-size:2.5rem'>Notre Portfolio</h2>", unsafe_allow_html=True)
+    st.markdown("<p style='color:#64A4C4'>Découvrez une sélection de nos meilleurs projets.</p><br>", unsafe_allow_html=True)
+    
+    # Création d'une grille de 3 colonnes pour les images
+    col1, col2, col3 = st.columns(3)
+    
+    # COLONNE 1
+    with col1:
+        # Pour utiliser tes propres photos, remplace l'URL par le chemin de ton image.
+        # Exemple : st.image("mes_images/logo1.png", use_container_width=True)
+        st.image("https://picsum.photos/400/400?random=1", use_container_width=True)
+        st.markdown("<strong>Identité Visuelle</strong><br><span style='font-size:0.8rem;color:gray'>Création de Logo</span><br><br>", unsafe_allow_html=True)
+        
+        st.image("https://picsum.photos/400/400?random=4", use_container_width=True)
+        st.markdown("<strong>Signalétique</strong><br><span style='font-size:0.8rem;color:gray'>Enseigne Lumineuse</span><br><br>", unsafe_allow_html=True)
+
+    # COLONNE 2
+    with col2:
+        st.image("https://picsum.photos/400/400?random=2", use_container_width=True)
+        st.markdown("<strong>Print Corporate</strong><br><span style='font-size:0.8rem;color:gray'>Cartes de Visite Premium</span><br><br>", unsafe_allow_html=True)
+        
+        st.image("https://picsum.photos/400/400?random=5", use_container_width=True)
+        st.markdown("<strong>Campagne Marketing</strong><br><span style='font-size:0.8rem;color:gray'>Affiches A3</span><br><br>", unsafe_allow_html=True)
+
+    # COLONNE 3
+    with col3:
+        st.image("https://picsum.photos/400/400?random=3", use_container_width=True)
+        st.markdown("<strong>Packaging</strong><br><span style='font-size:0.8rem;color:gray'>Boîte sur-mesure</span><br><br>", unsafe_allow_html=True)
+        
+        st.image("https://picsum.photos/400/400?random=6", use_container_width=True)
+        st.markdown("<strong>Web Design</strong><br><span style='font-size:0.8rem;color:gray'>Maquette UI/UX</span><br><br>", unsafe_allow_html=True)
+
 
 elif menu == "📅 DEVIS EXPRESS":
     st.markdown("<h2>Obtenir un Devis Gratuit</h2>", unsafe_allow_html=True)
