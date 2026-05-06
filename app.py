@@ -1,7 +1,7 @@
 import streamlit as st
 import urllib.parse
 
-# 1. CONFIGURATION ET NETTOYAGE RADICAL
+# 1. CONFIGURATION DE LA PAGE
 st.set_page_config(
     page_title="CHIC Graphic & Print | Agence Créative",
     page_icon="🎨",
@@ -9,17 +9,15 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# On garde le menu (header) mais on cache le Footer Streamlit et le bouton de déploiement
+# 2. STYLE CSS (Design Pro & Menu Visible)
 st.markdown("""
     <style>
-    /* footer {visibility: hidden;}  <- Décommente cette ligne si tu veux cacher "Made with Streamlit" en bas */
+    footer {visibility: hidden;}
     div[data-testid="stToolbar"] {display: none;}
     .block-container {padding-top: 2rem;}
     
-    /* Import des polices */
     @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500&display=swap');
 
-    /* Variables de couleurs */
     :root {
         --primary:  #38BDF8;
         --secondary: #0284C7;
@@ -38,7 +36,6 @@ st.markdown("""
 
     h1, h2, h3 { font-family: 'Syne', sans-serif; font-weight: 800; }
 
-    /* Hero Section */
     .hero {
         background: linear-gradient(135deg, #0C4A6E 0%, #075985 60%, #0369A1 100%);
         color: #fff;
@@ -48,9 +45,7 @@ st.markdown("""
         box-shadow: 0 20px 40px rgba(12, 74, 110, 0.2);
     }
     .hero h1 { font-size: 3.5rem; margin-bottom: 10px; color: #fff; line-height: 1.1; }
-    .hero p { font-size: 1.2rem; opacity: 0.9; max-width: 600px; }
 
-    /* Cards */
     .card {
         background: #fff;
         border-radius: var(--radius);
@@ -60,30 +55,20 @@ st.markdown("""
         transition: all 0.3s ease;
         height: 100%;
     }
-    .card:hover {
-        transform: translateY(-10px);
-        box-shadow: 0 20px 40px rgba(2,132,199,0.15);
-        border-color: var(--primary);
-    }
 
-    /* Stats & Badges */
     .stat-box {
         background: var(--bg-alt);
         border-radius: 15px;
         padding: 20px;
         text-align: center;
-        border: 1px solid #bae6fd;
     }
-    .stat-num { font-size: 2.2rem; font-weight: 800; color: var(--secondary); display: block; }
 
-    /* Sidebar Pro */
     section[data-testid="stSidebar"] {
         background-color: #0C4A6E !important;
         border-right: 4px solid var(--primary);
     }
     section[data-testid="stSidebar"] * { color: white !important; }
 
-    /* Footer Pro */
     .footer-pro {
         background: var(--dark);
         color: #fff;
@@ -92,15 +77,22 @@ st.markdown("""
         margin-top: 60px;
         text-align: center;
     }
+
+    /* Style des images pour qu'elles soient grandes et belles */
+    [data-testid="stImage"] {
+        border-radius: 12px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
     </style>
 """, unsafe_allow_html=True)
 
-# 2. DONNÉES ET CONSTANTES
+# 3. DONNÉES ET CONSTANTES
 BRAND_NAME = "CHIC Graphic & Print"
 WHATSAPP_NUMBER = "221778615900" 
 LOCATION = "Dakar, Sénégal"
 
-# 3. BARRE LATÉRALE
+# 4. BARRE LATÉRALE
 with st.sidebar:
     st.markdown(f"""
         <div style='text-align:center; padding:20px 0'>
@@ -108,12 +100,12 @@ with st.sidebar:
         </div>
     """, unsafe_allow_html=True)
     st.markdown("---")
-    # AJOUT DE "RÉALISATIONS" DANS LE MENU
     menu = st.radio("MENU", ["🏠 ACCUEIL", "⚙️ SERVICES", "📸 RÉALISATIONS", "📅 DEVIS EXPRESS", "✉️ CONTACT"])
     st.markdown("---")
     st.markdown(f"📍 {LOCATION}")
 
-# 4. LOGIQUE DES PAGES
+# 5. LOGIQUE DES PAGES
+
 if menu == "🏠 ACCUEIL":
     st.markdown(f"""
         <div class="hero">
@@ -129,101 +121,55 @@ if menu == "🏠 ACCUEIL":
         col.markdown(f"<div class='stat-box'><span class='stat-num'>{val}</span><span style='font-weight:600'>{label}</span></div>", unsafe_allow_html=True)
 
 elif menu == "⚙️ SERVICES":
-    st.markdown("<h2 style='font-size:2.5rem'>Nos Solutions</h2>", unsafe_allow_html=True)
-    st.markdown("<p style='color:#64A4C4'>Une expertise complète pour votre image de marque.</p><br>", unsafe_allow_html=True)
-    
+    st.markdown("<h2 style='font-size:2.5rem'>Nos Solutions</h2><br>", unsafe_allow_html=True)
     services = [
-        ("🎨", "Branding & Logo", "Création d'identités visuelles uniques qui marquent les esprits."),
-        ("🖨️", "Impression Print", "Flyers, cartes de visite et affiches sur supports premium."),
-        ("📦", "Packaging Design", "Conception d'emballages qui valorisent vos produits."),
-        ("🏢", "Signalétique", "Habillage de boutiques, enseignes et supports publicitaires.")
+        ("🎨", "Branding & Logo", "Création d'identités visuelles uniques."),
+        ("🖨️", "Impression Print", "Flyers, cartes de visite et affiches."),
+        ("📦", "Packaging", "Conception d'emballages valorisants."),
+        ("🏢", "Signalétique", "Habillage de boutiques et enseignes.")
     ]
-    
     cols = st.columns(2)
     for i, (icon, title, desc) in enumerate(services):
         with cols[i % 2]:
-            st.markdown(f"""
-                <div class="card">
-                    <div style="font-size:2.5rem">{icon}</div>
-                    <h3 style="margin:15px 0">{title}</h3>
-                    <p style="color:#64A4C4; font-size:0.95rem">{desc}</p>
-                </div><br>
-            """, unsafe_allow_html=True)
+            st.markdown(f'<div class="card"><div style="font-size:2rem">{icon}</div><h3>{title}</h3><p>{desc}</p></div><br>', unsafe_allow_html=True)
 
-# ---- NOUVELLE PAGE : RÉALISATIONS ----
 elif menu == "📸 RÉALISATIONS":
-    st.markdown("<h2 style='font-size:2.5rem'>Notre Portfolio</h2>", unsafe_allow_html=True)
-    st.markdown("<p style='color:#64A4C4'>Découvrez une sélection de nos meilleurs projets.</p><br>", unsafe_allow_html=True)
+    st.markdown("<h2 style='font-size:2.5rem'>Notre Portfolio</h2><br>", unsafe_allow_html=True)
     
-    # Création d'une grille de 3 colonnes pour les images
-    col1, col2, col3 = st.columns(3)
+    # On liste tes fichiers tels qu'ils sont sur GitHub
+    # J'ai ajouté photo10 en premier car elle est en haut de ta liste
+    photos = ["photo10.jpg", "photo2.jpg", "photo3.jpg", "photo4.jpg", "photo5.jpg", 
+              "photo6.jpg", "photo7.jpg", "photo8.jpg", "photo9.jpg"]
     
-    # COLONNE 1
-    with col1:
-        # Pour utiliser tes propres photos, remplace l'URL par le chemin de ton image.
-        # Exemple : st.image("mes_images/logo1.png", use_container_width=True)
-        st.image("https://picsum.photos/400/400?random=1", use_container_width=True)
-        st.markdown("<strong>Identité Visuelle</strong><br><span style='font-size:0.8rem;color:gray'>Création de Logo</span><br><br>", unsafe_allow_html=True)
-        
-        st.image("https://picsum.photos/400/400?random=4", use_container_width=True)
-        st.markdown("<strong>Signalétique</strong><br><span style='font-size:0.8rem;color:gray'>Enseigne Lumineuse</span><br><br>", unsafe_allow_html=True)
-
-    # COLONNE 2
-    with col2:
-        st.image("https://picsum.photos/400/400?random=2", use_container_width=True)
-        st.markdown("<strong>Print Corporate</strong><br><span style='font-size:0.8rem;color:gray'>Cartes de Visite Premium</span><br><br>", unsafe_allow_html=True)
-        
-        st.image("https://picsum.photos/400/400?random=5", use_container_width=True)
-        st.markdown("<strong>Campagne Marketing</strong><br><span style='font-size:0.8rem;color:gray'>Affiches A3</span><br><br>", unsafe_allow_html=True)
-
-    # COLONNE 3
-    with col3:
-        st.image("https://picsum.photos/400/400?random=3", use_container_width=True)
-        st.markdown("<strong>Packaging</strong><br><span style='font-size:0.8rem;color:gray'>Boîte sur-mesure</span><br><br>", unsafe_allow_html=True)
-        
-        st.image("https://picsum.photos/400/400?random=6", use_container_width=True)
-        st.markdown("<strong>Web Design</strong><br><span style='font-size:0.8rem;color:gray'>Maquette UI/UX</span><br><br>", unsafe_allow_html=True)
-
+    col1, col2 = st.columns(2)
+    
+    for i, p in enumerate(photos):
+        if i % 2 == 0:
+            col1.image(p, use_container_width=True)
+        else:
+            col2.image(p, use_container_width=True)
 
 elif menu == "📅 DEVIS EXPRESS":
     st.markdown("<h2>Obtenir un Devis Gratuit</h2>", unsafe_allow_html=True)
-    st.markdown("<div style='background:white; padding:30px; border-radius:20px; border:1px solid #E0F2FE'>", unsafe_allow_html=True)
-    
     with st.form("devis_form"):
-        nom = st.text_input("Nom de l'entreprise ou Projet")
-        type_projet = st.multiselect("Services souhaités", ["Logo", "Flyers", "Cartes de visite", "Packaging", "Autre"])
-        details = st.text_area("Décrivez votre besoin (quantité, dimensions...)")
+        nom = st.text_input("Nom du Projet")
+        type_projet = st.multiselect("Services", ["Logo", "Flyers", "Cartes", "Autre"])
+        details = st.text_area("Détails du besoin")
         submit = st.form_submit_button("🚀 Préparer mon devis")
-        
         if submit:
-            msg = f"Bonjour {BRAND_NAME}, je souhaite un devis pour : {', '.join(type_projet)}. Projet : {nom}. Détails : {details}"
+            msg = f"Devis pour : {', '.join(type_projet)}. Projet : {nom}. Détails : {details}"
             link = f"https://wa.me/{WHATSAPP_NUMBER}?text={urllib.parse.quote(msg)}"
-            st.success("Demande prête !")
-            st.markdown(f"<a href='{link}' target='_blank' style='text-decoration:none;'><div style='background:#38BDF8; color:white; padding:15px; text-align:center; border-radius:10px; font-weight:bold;'>ENVOYER SUR WHATSAPP</div></a>", unsafe_allow_html=True)
-    st.markdown("</div>", unsafe_allow_html=True)
+            st.success("Cliquez ci-dessous pour envoyer")
+            st.markdown(f"<a href='{link}' target='_blank'><div style='background:#38BDF8; color:white; padding:15px; text-align:center; border-radius:10px; font-weight:bold;'>ENVOYER SUR WHATSAPP</div></a>", unsafe_allow_html=True)
 
 elif menu == "✉️ CONTACT":
-    st.markdown("<h2>Parlons de votre projet</h2>", unsafe_allow_html=True)
-    c1, c2 = st.columns(2)
-    with c1:
-        st.markdown(f"""
-            <div class="card">
-                <h4>Nos coordonnées</h4>
-                <p>📍 {LOCATION}</p>
-                <p>📧 contact@chic-graphic.sn</p>
-                <p>📞 +221 77 861 59 00</p>
-            </div>
-        """, unsafe_allow_html=True)
-    with c2:
-        st.info("Nous sommes ouverts du Lundi au Samedi de 09h à 19h.")
+    st.markdown("<h2>Contactez-nous</h2>", unsafe_allow_html=True)
+    st.markdown(f'<div class="card">📍 {LOCATION}<br>📧 contact@chic-graphic.sn<br>📞 +221 77 861 59 00</div>', unsafe_allow_html=True)
 
-# 5. FOOTER PROFESSIONNEL
+# 6. FOOTER
 st.markdown(f"""
     <div class="footer-pro">
         <div style="font-family:Syne; font-size:1.5rem; font-weight:800;">{BRAND_NAME}</div>
-        <p style="opacity:0.6; font-size:0.9rem; margin-top:10px;">
-            © 2026 · Créateur de solutions visuelles · {LOCATION}<br>
-            Design by CHIC Graphic & Print
-        </p>
+        <p>© 2026 · {LOCATION}</p>
     </div>
 """, unsafe_allow_html=True)
