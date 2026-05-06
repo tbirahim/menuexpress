@@ -6,24 +6,15 @@ st.set_page_config(
     page_title="CHIC Graphic & Print | Agence Créative",
     page_icon="🎨",
     layout="wide",
-    initial_sidebar_state="expanded",
 )
 
-# 2. STYLE CSS (Réactivé pour afficher le bouton Menu)
+# 2. STYLE CSS (Menu en Bas & Design Original)
 st.markdown("""
     <style>
-    /* On NE cache PLUS le header pour laisser les 3 barres visibles */
     footer {visibility: hidden;}
     div[data-testid="stToolbar"] {display: none;}
-    
-    /* --- STYLE DU BOUTON MENU (LES 3 BARRES) --- */
-    /* On force le bouton à être visible et coloré */
-    button[kind="headerNoPadding"] {
-        background-color: #38BDF8 !important;
-        color: white !important;
-        border-radius: 8px !important;
-        margin-left: 10px !important;
-    }
+    header {visibility: hidden;}
+    [data-testid="stSidebar"] {display: none;}
 
     @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500&display=swap');
 
@@ -42,14 +33,30 @@ st.markdown("""
         color: var(--dark);
     }
 
-    /* Style de la barre latérale */
-    section[data-testid="stSidebar"] {
-        background-color: #0C4A6E !important;
-        border-right: 4px solid var(--primary);
+    /* --- BARRE DE NAVIGATION EN BAS --- */
+    .nav-bottom {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background-color: #0C4A6E;
+        padding: 10px 0;
+        z-index: 9999;
+        border-top: 3px solid #38BDF8;
+        box-shadow: 0 -5px 15px rgba(0,0,0,0.2);
     }
-    section[data-testid="stSidebar"] * { color: white !important; }
 
-    /* Accueil - Hero Section */
+    /* Style des boutons Streamlit pour le menu */
+    div.stButton > button {
+        background-color: #38BDF8 !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 8px !important;
+        font-weight: bold !important;
+        width: 100% !important;
+    }
+
+    /* Accueil - Hero Section Originale */
     .hero {
         background: linear-gradient(135deg, #0C4A6E 0%, #075985 50%, #0369A1 100%);
         color: #fff;
@@ -73,8 +80,7 @@ st.markdown("""
         padding: 35px;
         box-shadow: 0 10px 30px rgba(0,0,0,0.05);
         border: 1px solid #f0f9ff;
-        transition: 0.3s;
-        height: 100%;
+        margin-bottom: 20px;
     }
 
     .stat-box {
@@ -96,35 +102,25 @@ st.markdown("""
         text-align: center;
     }
 
-    .footer-pro {
-        background: var(--dark);
-        color: #fff;
-        border-radius: 25px;
-        padding: 40px;
-        margin-top: 60px;
-        text-align: center;
+    /* Padding pour ne pas cacher le contenu derrière le menu du bas */
+    .content-area {
+        padding-bottom: 100px;
     }
     </style>
 """, unsafe_allow_html=True)
 
-# 3. DONNÉES
-BRAND_NAME = "CHIC Graphic & Print"
-WHATSAPP_NUMBER = "221778615900" 
-LOCATION = "Dakar, Sénégal"
+# 3. GESTION DE LA NAVIGATION
+if 'page' not in st.session_state:
+    st.session_state.page = "🏠 ACCUEIL"
 
-# 4. BARRE LATÉRALE
-with st.sidebar:
-    st.markdown(f"""
-        <div style='text-align:center; padding:20px 0'>
-            <div style='font-family:Syne; font-size:1.8rem; font-weight:800; line-height:1;'>CHIC<br><span style='color:#38BDF8; font-size:1.2rem'>Graphic & Print</span></div>
-        </div>
-    """, unsafe_allow_html=True)
-    st.markdown("---")
-    menu = st.radio("NAVIGATION", ["🏠 ACCUEIL", "⚙️ SERVICES", "📸 RÉALISATIONS", "📅 DEVIS EXPRESS", "✉️ CONTACT"])
-    st.markdown("---")
-    st.markdown(f"<div style='text-align:center; opacity:0.7'>📍 {LOCATION}</div>", unsafe_allow_html=True)
+def set_page(name):
+    st.session_state.page = name
 
-# 5. LOGIQUE DES PAGES
+# 4. CONTENU (DANS UNE DIV POUR LE PADDING)
+st.markdown('<div class="content-area">', unsafe_allow_html=True)
+
+menu = st.session_state.page
+
 if menu == "🏠 ACCUEIL":
     st.markdown(f"""
         <div class="hero">
@@ -149,7 +145,7 @@ elif menu == "⚙️ SERVICES":
     cols = st.columns(2)
     for i, (icon, title, desc) in enumerate(services):
         with cols[i % 2]:
-            st.markdown(f'<div class="card"><div style="font-size:2.5rem">{icon}</div><h3>{title}</h3><p>{desc}</p></div><br>', unsafe_allow_html=True)
+            st.markdown(f'<div class="card"><div style="font-size:2.5rem">{icon}</div><h3>{title}</h3><p>{desc}</p></div>', unsafe_allow_html=True)
 
 elif menu == "📸 RÉALISATIONS":
     st.markdown("<h2 style='font-family:Syne; font-size:2.5rem'>Portfolio</h2><br>", unsafe_allow_html=True)
@@ -161,26 +157,29 @@ elif menu == "📸 RÉALISATIONS":
         else: col2.image(p, use_container_width=True)
 
 elif menu == "📅 DEVIS EXPRESS":
-    st.markdown("<h2 style='font-family:Syne;'>Lancez votre projet</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 style='font-family:Syne;'>Lancer votre projet</h2>", unsafe_allow_html=True)
     with st.form("devis_form"):
-        nom = st.text_input("Nom du Projet / Entreprise")
+        nom = st.text_input("Projet / Entreprise")
         type_p = st.multiselect("Services", ["Branding", "Print", "Packaging", "Signalétique"])
-        details = st.text_area("Détails du besoin")
-        submit = st.form_submit_button("🚀 Valider la demande")
-        
+        details = st.text_area("Détails")
+        submit = st.form_submit_button("🚀 Valider")
         if submit:
-            msg = f"Bonjour CHIC G&P, je souhaite un devis pour : {', '.join(type_p)}. Projet : {nom}. Détails : {details}"
-            link = f"https://wa.me/{WHATSAPP_NUMBER}?text={urllib.parse.quote(msg)}"
+            msg = f"Bonjour CHIC G&P, je souhaite un devis pour : {', '.join(type_p)}. Projet : {nom}."
+            link = f"https://wa.me/221778615900?text={urllib.parse.quote(msg)}"
             st.markdown(f"<a href='{link}' target='_blank' class='wa-button'>ENVOYER SUR WHATSAPP</a>", unsafe_allow_html=True)
 
 elif menu == "✉️ CONTACT":
     st.markdown("<h2 style='font-family:Syne;'>Contact</h2>", unsafe_allow_html=True)
-    st.markdown(f'<div class="card">📍 {LOCATION}<br>📧 contact@chic-graphic.sn<br>📞 +221 77 861 59 00</div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="card">📍 Dakar, Sénégal<br>📧 contact@chic-graphic.sn<br>📞 +221 77 861 59 00</div>', unsafe_allow_html=True)
 
-# 6. FOOTER
-st.markdown(f"""
-    <div class="footer-pro">
-        <div style="font-family:Syne; font-size:1.5rem; font-weight:800;">{BRAND_NAME}</div>
-        <p>© 2026 · {LOCATION}</p>
-    </div>
-""", unsafe_allow_html=True)
+st.markdown('</div>', unsafe_allow_html=True)
+
+# 5. BARRE DE NAVIGATION FIXÉE EN BAS
+st.markdown('<div class="nav-bottom">', unsafe_allow_html=True)
+c1, c2, c3, c4, c5 = st.columns(5)
+with c1: st.button("ACCUEIL", on_click=set_page, args=("🏠 ACCUEIL",))
+with c2: st.button("SERVICES", on_click=set_page, args=("⚙️ SERVICES",))
+with c3: st.button("PROJETS", on_click=set_page, args=("📸 RÉALISATIONS",))
+with c4: st.button("DEVIS", on_click=set_page, args=("📅 DEVIS EXPRESS",))
+with c5: st.button("CONTACT", on_click=set_page, args=("✉️ CONTACT",))
+st.markdown('</div>', unsafe_allow_html=True)
