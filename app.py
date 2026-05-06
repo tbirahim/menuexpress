@@ -8,7 +8,7 @@ st.set_page_config(
     layout="wide",
 )
 
-# 2. STYLE CSS PREMIUM (Menu Haut Fixe + Design original)
+# 2. STYLE CSS PREMIUM (Menu Haut Fixe + Boutons Bleus + Design original)
 st.markdown("""
     <style>
     footer {visibility: hidden;}
@@ -46,8 +46,26 @@ st.markdown("""
         text-align: center;
     }
 
+    /* --- STYLE DES BOUTONS DU MENU (BLEU) --- */
+    div.stButton > button {
+        background-color: #38BDF8 !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 10px !important;
+        padding: 10px 20px !important;
+        font-weight: bold !important;
+        transition: all 0.3s ease-in-out !important;
+        width: 100% !important;
+    }
+
+    div.stButton > button:hover {
+        background-color: #0284C7 !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 5px 15px rgba(56, 189, 248, 0.4) !important;
+    }
+
     .main-content {
-        margin-top: 80px; /* Espace pour le menu fixe */
+        margin-top: 100px; /* Espace pour le menu fixe */
     }
 
     /* Design Hero original */
@@ -84,9 +102,9 @@ st.markdown("""
     }
     .stat-num { font-family: 'Syne', sans-serif; font-size: 2.2rem; font-weight: 800; color: var(--secondary); }
 
-    /* Bouton Devis Style */
+    /* Bouton Devis Style WhatsApp final */
     .wa-button {
-        background-color: #38BDF8;
+        background-color: #25D366; /* Vert WhatsApp */
         color: white !important;
         padding: 15px 25px;
         border-radius: 10px;
@@ -96,6 +114,7 @@ st.markdown("""
         margin-top: 10px;
         text-align: center;
         width: 100%;
+        box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
     }
     </style>
 """, unsafe_allow_html=True)
@@ -107,14 +126,15 @@ if 'page' not in st.session_state:
 def set_page(name):
     st.session_state.page = name
 
-# 4. BARRE DE NAVIGATION (BOUTONS)
+# 4. BARRE DE NAVIGATION (BOUTONS BLEUS)
 st.markdown('<div class="nav-container">', unsafe_allow_html=True)
+# On crée 5 colonnes pour le menu
 c1, c2, c3, c4, c5 = st.columns(5)
-with c1: st.button("ACCUEIL", on_click=set_page, args=("🏠 ACCUEIL",), use_container_width=True)
-with c2: st.button("SERVICES", on_click=set_page, args=("⚙️ SERVICES",), use_container_width=True)
-with c3: st.button("PORTFOLIO", on_click=set_page, args=("📸 RÉALISATIONS",), use_container_width=True)
-with c4: st.button("DEVIS", on_click=set_page, args=("📅 DEVIS EXPRESS",), use_container_width=True)
-with c5: st.button("CONTACT", on_click=set_page, args=("✉️ CONTACT",), use_container_width=True)
+with c1: st.button("ACCUEIL", on_click=set_page, args=("🏠 ACCUEIL",))
+with c2: st.button("SERVICES", on_click=set_page, args=("⚙️ SERVICES",))
+with c3: st.button("PORTFOLIO", on_click=set_page, args=("📸 RÉALISATIONS",))
+with c4: st.button("DEVIS", on_click=set_page, args=("📅 DEVIS EXPRESS",))
+with c5: st.button("CONTACT", on_click=set_page, args=("✉️ CONTACT",))
 st.markdown('</div>', unsafe_allow_html=True)
 
 st.markdown('<div class="main-content">', unsafe_allow_html=True)
@@ -136,7 +156,7 @@ if menu == "🏠 ACCUEIL":
         col.markdown(f"<div class='stat-box'><span class='stat-num'>{val}</span><br><b>{label}</b></div>", unsafe_allow_html=True)
 
 elif menu == "⚙️ SERVICES":
-    st.markdown("<h2 style='font-family:Syne; font-size:2.5rem;'>Nos Expertise</h2><br>", unsafe_allow_html=True)
+    st.markdown("<h2 style='font-family:Syne; font-size:2.5rem;'>Nos Expertises</h2><br>", unsafe_allow_html=True)
     services = [
         ("🎨", "Branding", "Logos et identités visuelles uniques."),
         ("🖨️", "Print", "Flyers, cartes et brochures premium."),
@@ -150,6 +170,7 @@ elif menu == "⚙️ SERVICES":
 
 elif menu == "📸 RÉALISATIONS":
     st.markdown("<h2 style='font-family:Syne; font-size:2.5rem;'>Notre Portfolio</h2><br>", unsafe_allow_html=True)
+    # Les noms de tes photos sur GitHub
     photos = ["photo10.jpg", "photo2.jpg", "photo3.jpg", "photo4.jpg", "photo5.jpg", "photo6.jpg", "photo7.jpg", "photo8.jpg", "photo9.jpg"]
     col1, col2 = st.columns(2)
     for i, p in enumerate(photos):
@@ -168,14 +189,23 @@ elif menu == "📅 DEVIS EXPRESS":
             if nom and type_p:
                 msg = f"Bonjour CHIC Graphic & Print, je souhaite un devis pour : {', '.join(type_p)}. Projet : {nom}. Détails : {details}"
                 whatsapp_url = f"https://wa.me/221778615900?text={urllib.parse.quote(msg)}"
-                st.success("Message prêt !")
+                st.success("✅ Message préparé avec succès !")
                 st.markdown(f'<a href="{whatsapp_url}" target="_blank" class="wa-button">CLIQUEZ ICI POUR ENVOYER SUR WHATSAPP</a>', unsafe_allow_html=True)
             else:
-                st.error("Veuillez remplir au moins le nom et le service.")
+                st.error("⚠️ Veuillez remplir le nom et choisir au moins un service.")
 
 elif menu == "✉️ CONTACT":
     st.markdown("<h2 style='font-family:Syne;'>Contactez-nous</h2>", unsafe_allow_html=True)
-    st.markdown(f'<div class="card">📍 Dakar, Sénégal<br>📧 contact@chic-graphic.sn<br>📞 +221 77 861 59 00</div>', unsafe_allow_html=True)
+    st.markdown(f"""
+        <div class="card">
+            <h3>Coordonnées</h3>
+            <p>📍 Dakar, Sénégal</p>
+            <p>📧 contact@chic-graphic.sn</p>
+            <p>📞 +221 77 861 59 00</p>
+            <hr>
+            <p><i>Ouvert du Lundi au Samedi de 09h à 19h</i></p>
+        </div>
+    """, unsafe_allow_html=True)
 
 st.markdown('</div>', unsafe_allow_html=True)
 
@@ -183,6 +213,6 @@ st.markdown('</div>', unsafe_allow_html=True)
 st.markdown(f"""
     <div style="text-align:center; padding:50px; background:#0C4A6E; color:white; border-radius:25px; margin-top:50px;">
         <h3 style="font-family:Syne; color:white;">CHIC Graphic & Print</h3>
-        <p>© 2026 · Excellence Visuelle à Dakar</p>
+        <p>© 2026 · Excellence Visuelle à Dakar · Créé avec Passion</p>
     </div>
 """, unsafe_allow_html=True)
