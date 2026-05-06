@@ -9,13 +9,22 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# 2. STYLE CSS ORIGINAL (Bleu Premium & Menu Latéral)
+# 2. STYLE CSS (Réactivé pour afficher le bouton Menu)
 st.markdown("""
     <style>
+    /* On NE cache PLUS le header pour laisser les 3 barres visibles */
     footer {visibility: hidden;}
     div[data-testid="stToolbar"] {display: none;}
-    header {visibility: hidden;}
     
+    /* --- STYLE DU BOUTON MENU (LES 3 BARRES) --- */
+    /* On force le bouton à être visible et coloré */
+    button[kind="headerNoPadding"] {
+        background-color: #38BDF8 !important;
+        color: white !important;
+        border-radius: 8px !important;
+        margin-left: 10px !important;
+    }
+
     @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500&display=swap');
 
     :root {
@@ -40,7 +49,7 @@ st.markdown("""
     }
     section[data-testid="stSidebar"] * { color: white !important; }
 
-    /* Accueil - Hero Section Originale */
+    /* Accueil - Hero Section */
     .hero {
         background: linear-gradient(135deg, #0C4A6E 0%, #075985 50%, #0369A1 100%);
         color: #fff;
@@ -57,9 +66,7 @@ st.markdown("""
         line-height: 1.1;
         color: white;
     }
-    .hero p { font-size: 1.2rem; opacity: 0.9; max-width: 650px; }
 
-    /* Cartes de Services */
     .card {
         background: #fff;
         border-radius: var(--radius);
@@ -69,9 +76,7 @@ st.markdown("""
         transition: 0.3s;
         height: 100%;
     }
-    .card:hover { transform: translateY(-10px); border-color: var(--primary); }
 
-    /* Stats */
     .stat-box {
         background: var(--bg-alt);
         border-radius: 15px;
@@ -80,7 +85,6 @@ st.markdown("""
     }
     .stat-num { font-family: 'Syne', sans-serif; font-size: 2.2rem; font-weight: 800; color: var(--secondary); display: block; }
     
-    /* Bouton WhatsApp Final */
     .wa-button {
         background-color: #25D366;
         color: white !important;
@@ -90,7 +94,6 @@ st.markdown("""
         font-weight: bold;
         display: block;
         text-align: center;
-        margin-top: 10px;
     }
 
     .footer-pro {
@@ -109,7 +112,7 @@ BRAND_NAME = "CHIC Graphic & Print"
 WHATSAPP_NUMBER = "221778615900" 
 LOCATION = "Dakar, Sénégal"
 
-# 4. BARRE LATÉRALE ORIGINALE
+# 4. BARRE LATÉRALE
 with st.sidebar:
     st.markdown(f"""
         <div style='text-align:center; padding:20px 0'>
@@ -136,7 +139,7 @@ if menu == "🏠 ACCUEIL":
         col.markdown(f"<div class='stat-box'><span class='stat-num'>{val}</span><span style='font-weight:600; color:#64A4C4'>{label}</span></div>", unsafe_allow_html=True)
 
 elif menu == "⚙️ SERVICES":
-    st.markdown("<h2 style='font-family:Syne; font-size:2.5rem'>Nos Expertise</h2><br>", unsafe_allow_html=True)
+    st.markdown("<h2 style='font-family:Syne; font-size:2.5rem'>Nos Expertises</h2><br>", unsafe_allow_html=True)
     services = [
         ("🎨", "Branding", "Logos et identités visuelles."),
         ("🖨️", "Print", "Flyers, cartes et brochures."),
@@ -149,29 +152,25 @@ elif menu == "⚙️ SERVICES":
             st.markdown(f'<div class="card"><div style="font-size:2.5rem">{icon}</div><h3>{title}</h3><p>{desc}</p></div><br>', unsafe_allow_html=True)
 
 elif menu == "📸 RÉALISATIONS":
-    st.markdown("<h2 style='font-family:Syne; font-size:2.5rem'>Notre Portfolio</h2><br>", unsafe_allow_html=True)
-    # On utilise tes photos directement à la racine
+    st.markdown("<h2 style='font-family:Syne; font-size:2.5rem'>Portfolio</h2><br>", unsafe_allow_html=True)
     photos = ["photo10.jpg", "photo2.jpg", "photo3.jpg", "photo4.jpg", "photo5.jpg", 
               "photo6.jpg", "photo7.jpg", "photo8.jpg", "photo9.jpg"]
     col1, col2 = st.columns(2)
     for i, p in enumerate(photos):
-        if i % 2 == 0:
-            col1.image(p, use_container_width=True)
-        else:
-            col2.image(p, use_container_width=True)
+        if i % 2 == 0: col1.image(p, use_container_width=True)
+        else: col2.image(p, use_container_width=True)
 
 elif menu == "📅 DEVIS EXPRESS":
     st.markdown("<h2 style='font-family:Syne;'>Lancez votre projet</h2>", unsafe_allow_html=True)
     with st.form("devis_form"):
         nom = st.text_input("Nom du Projet / Entreprise")
         type_p = st.multiselect("Services", ["Branding", "Print", "Packaging", "Signalétique"])
-        details = st.text_area("Décrivez votre besoin")
+        details = st.text_area("Détails du besoin")
         submit = st.form_submit_button("🚀 Valider la demande")
         
         if submit:
-            msg = f"Bonjour CHIC Graphic & Print, je souhaite un devis pour : {', '.join(type_p)}. Projet : {nom}. Détails : {details}"
+            msg = f"Bonjour CHIC G&P, je souhaite un devis pour : {', '.join(type_p)}. Projet : {nom}. Détails : {details}"
             link = f"https://wa.me/{WHATSAPP_NUMBER}?text={urllib.parse.quote(msg)}"
-            st.success("Message prêt !")
             st.markdown(f"<a href='{link}' target='_blank' class='wa-button'>ENVOYER SUR WHATSAPP</a>", unsafe_allow_html=True)
 
 elif menu == "✉️ CONTACT":
