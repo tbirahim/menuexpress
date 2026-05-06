@@ -8,151 +8,181 @@ st.set_page_config(
     layout="wide",
 )
 
-# 2. STYLE CSS POUR LE MENU HORIZONTAL EN HAUT
+# 2. STYLE CSS PREMIUM (Menu Haut Fixe + Design original)
 st.markdown("""
     <style>
-    /* Cacher les éléments par défaut de Streamlit */
     footer {visibility: hidden;}
     div[data-testid="stToolbar"] {display: none;}
     header {visibility: hidden;}
-    [data-testid="stSidebar"] {display: none;} /* On cache totalement la barre latérale */
+    [data-testid="stSidebar"] {display: none;}
 
     @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500&display=swap');
 
     :root {
         --primary:  #38BDF8;
+        --secondary: #0284C7;
         --dark:     #0C4A6E;
         --light:    #FFFFFF;
+        --bg-alt:   #E0F2FE;
+        --radius:   20px;
     }
 
     html, body, [class*="css"] {
         font-family: 'DM Sans', sans-serif;
         background-color: white;
+        color: var(--dark);
     }
 
-    /* Menu Horizontal Fixe en haut */
-    .nav-bar {
+    /* Barre de navigation fixe en haut */
+    .nav-container {
         position: fixed;
         top: 0;
         left: 0;
         width: 100%;
-        background-color: var(--dark);
-        padding: 15px 50px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        z-index: 1000;
-        border-bottom: 3px solid var(--primary);
-    }
-    .nav-logo {
-        font-family: 'Syne', sans-serif;
-        font-weight: 800;
-        color: white;
-        font-size: 1.2rem;
-    }
-    
-    /* Espacement pour ne pas que le contenu soit sous le menu */
-    .main-content {
-        margin-top: 100px;
+        background: #0C4A6E;
+        padding: 10px 0;
+        z-index: 9999;
+        border-bottom: 3px solid #38BDF8;
+        text-align: center;
     }
 
-    .hero {
-        background: linear-gradient(135deg, #0C4A6E 0%, #0369A1 100%);
-        color: #fff;
-        border-radius: 25px;
-        padding: 60px 40px;
-        margin-bottom: 40px;
+    .main-content {
+        margin-top: 80px; /* Espace pour le menu fixe */
     }
-    
+
+    /* Design Hero original */
+    .hero {
+        background: linear-gradient(135deg, #0C4A6E 0%, #075985 50%, #0369A1 100%);
+        color: #fff;
+        border-radius: 30px;
+        padding: 80px 50px;
+        margin-bottom: 40px;
+        box-shadow: 0 20px 40px rgba(12, 74, 110, 0.2);
+    }
+    .hero h1 { 
+        font-family: 'Syne', sans-serif; 
+        font-size: 3.5rem; 
+        font-weight: 800; 
+        color: white;
+        line-height: 1.1;
+    }
+
     .card {
-        background: #f8fafc;
-        border-radius: 15px;
+        background: #fff;
+        border-radius: var(--radius);
         padding: 30px;
-        border: 1px solid #e2e8f0;
+        box-shadow: 0 10px 30px rgba(2,132,199,0.08);
+        border: 1px solid #f0f9ff;
         height: 100%;
+    }
+
+    .stat-box {
+        background: var(--bg-alt);
+        border-radius: 15px;
+        padding: 20px;
+        text-align: center;
+    }
+    .stat-num { font-family: 'Syne', sans-serif; font-size: 2.2rem; font-weight: 800; color: var(--secondary); }
+
+    /* Bouton Devis Style */
+    .wa-button {
+        background-color: #38BDF8;
+        color: white !important;
+        padding: 15px 25px;
+        border-radius: 10px;
+        text-decoration: none;
+        font-weight: bold;
+        display: inline-block;
+        margin-top: 10px;
+        text-align: center;
+        width: 100%;
     }
     </style>
 """, unsafe_allow_html=True)
 
-# 3. BARRE DE NAVIGATION EN HAUT (DANS LE CORPS DE LA PAGE)
-st.markdown(f"""
-    <div class="nav-bar">
-        <div class="nav-logo">CHIC Graphic & Print</div>
-        <div style="color: #38BDF8; font-weight: bold; font-size: 0.9rem;">📍 Dakar, Sénégal</div>
-    </div>
-""", unsafe_allow_html=True)
+# 3. INITIALISATION DU MENU
+if 'page' not in st.session_state:
+    st.session_state.page = "🏠 ACCUEIL"
 
-# On utilise des boutons Streamlit pour la navigation en haut
+def set_page(name):
+    st.session_state.page = name
+
+# 4. BARRE DE NAVIGATION (BOUTONS)
+st.markdown('<div class="nav-container">', unsafe_allow_html=True)
+c1, c2, c3, c4, c5 = st.columns(5)
+with c1: st.button("ACCUEIL", on_click=set_page, args=("🏠 ACCUEIL",), use_container_width=True)
+with c2: st.button("SERVICES", on_click=set_page, args=("⚙️ SERVICES",), use_container_width=True)
+with c3: st.button("PORTFOLIO", on_click=set_page, args=("📸 RÉALISATIONS",), use_container_width=True)
+with c4: st.button("DEVIS", on_click=set_page, args=("📅 DEVIS EXPRESS",), use_container_width=True)
+with c5: st.button("CONTACT", on_click=set_page, args=("✉️ CONTACT",), use_container_width=True)
+st.markdown('</div>', unsafe_allow_html=True)
+
 st.markdown('<div class="main-content">', unsafe_allow_html=True)
-cols_menu = st.columns([1,1,1,1,1])
-with cols_menu[0]: menu = "🏠 ACCUEIL" if st.button("ACCUEIL", use_container_width=True) else ""
-with cols_menu[1]: 
-    if st.button("SERVICES", use_container_width=True): menu = "⚙️ SERVICES"
-with cols_menu[2]: 
-    if st.button("RÉALISATIONS", use_container_width=True): menu = "📸 RÉALISATIONS"
-with cols_menu[3]: 
-    if st.button("DEVIS", use_container_width=True): menu = "📅 DEVIS EXPRESS"
-with cols_menu[4]: 
-    if st.button("CONTACT", use_container_width=True): menu = "✉️ CONTACT"
 
-# Système de gestion d'état pour le menu
-if 'choice' not in st.session_state:
-    st.session_state.choice = "🏠 ACCUEIL"
-if menu != "":
-    st.session_state.choice = menu
+# 5. LOGIQUE DES PAGES
+menu = st.session_state.page
 
-current_page = st.session_state.choice
-
-# 4. LOGIQUE DES PAGES
-if current_page == "🏠 ACCUEIL":
+if menu == "🏠 ACCUEIL":
     st.markdown(f"""
         <div class="hero">
-            <h1 style="font-family:Syne; font-size:3rem; color:white;">L'audace visuelle.</h1>
-            <p>CHIC Graphic & Print : Excellence en design et impression à Dakar.</p>
+            <h1>L'audace visuelle<br>au service de votre marque.</h1>
+            <p style="font-size:1.2rem; opacity:0.9;">CHIC Graphic & Print fusionne créativité et précision technique pour des solutions d'impression et de design uniques à Dakar.</p>
         </div>
     """, unsafe_allow_html=True)
     
-    c1, c2, c3 = st.columns(3)
-    c1.metric("Qualité", "100% HD")
-    c2.metric("Délai", "24h/48h")
-    c3.metric("Expertise", "Premium")
+    c1, c2, c3, c4 = st.columns(4)
+    stats = [("100%", "Qualité HD"), ("24h", "Livraison"), ("PRO", "Design"), ("Dakar", "Local")]
+    for col, (val, label) in zip([c1, c2, c3, c4], stats):
+        col.markdown(f"<div class='stat-box'><span class='stat-num'>{val}</span><br><b>{label}</b></div>", unsafe_allow_html=True)
 
-elif current_page == "⚙️ SERVICES":
-    st.markdown("## Nos Services")
-    col_s1, col_s2 = st.columns(2)
-    with col_s1:
-        st.markdown('<div class="card"><h3>🎨 Branding</h3><p>Logos et chartes graphiques.</p></div>', unsafe_allow_html=True)
-    with col_s2:
-        st.markdown('<div class="card"><h3>🖨️ Print</h3><p>Flyers et cartes de visite.</p></div>', unsafe_allow_html=True)
+elif menu == "⚙️ SERVICES":
+    st.markdown("<h2 style='font-family:Syne; font-size:2.5rem;'>Nos Expertise</h2><br>", unsafe_allow_html=True)
+    services = [
+        ("🎨", "Branding", "Logos et identités visuelles uniques."),
+        ("🖨️", "Print", "Flyers, cartes et brochures premium."),
+        ("📦", "Packaging", "Emballages qui valorisent vos produits."),
+        ("🏢", "Signalétique", "Enseignes et habillage de vitrines.")
+    ]
+    cols = st.columns(2)
+    for i, (icon, title, desc) in enumerate(services):
+        with cols[i % 2]:
+            st.markdown(f'<div class="card"><div style="font-size:2.5rem">{icon}</div><h3>{title}</h3><p>{desc}</p></div><br>', unsafe_allow_html=True)
 
-elif current_page == "📸 RÉALISATIONS":
-    st.markdown("## Notre Portfolio")
-    photos = ["photo10.jpg", "photo2.jpg", "photo3.jpg", "photo4.jpg", "photo5.jpg", 
-              "photo6.jpg", "photo7.jpg", "photo8.jpg", "photo9.jpg"]
+elif menu == "📸 RÉALISATIONS":
+    st.markdown("<h2 style='font-family:Syne; font-size:2.5rem;'>Notre Portfolio</h2><br>", unsafe_allow_html=True)
+    photos = ["photo10.jpg", "photo2.jpg", "photo3.jpg", "photo4.jpg", "photo5.jpg", "photo6.jpg", "photo7.jpg", "photo8.jpg", "photo9.jpg"]
     col1, col2 = st.columns(2)
     for i, p in enumerate(photos):
-        if i % 2 == 0:
-            col1.image(p, use_container_width=True)
-        else:
-            col2.image(p, use_container_width=True)
+        if i % 2 == 0: col1.image(p, use_container_width=True)
+        else: col2.image(p, use_container_width=True)
 
-elif current_page == "📅 DEVIS EXPRESS":
-    st.markdown("## Devis Gratuit")
-    with st.form("devis"):
-        nom = st.text_input("Nom")
-        besoin = st.text_area("Votre besoin")
-        if st.form_submit_button("🚀 Préparer"):
-            st.success("Prêt à l'envoi WhatsApp !")
+elif menu == "📅 DEVIS EXPRESS":
+    st.markdown("<h2 style='font-family:Syne;'>Obtenir un Devis Gratuit</h2>", unsafe_allow_html=True)
+    with st.form("devis_form_wa"):
+        nom = st.text_input("Votre nom ou entreprise")
+        type_p = st.multiselect("Services", ["Branding", "Print", "Packaging", "Signalétique"])
+        details = st.text_area("Décrivez votre projet")
+        submit = st.form_submit_button("🚀 Générer le message WhatsApp")
+        
+        if submit:
+            if nom and type_p:
+                msg = f"Bonjour CHIC Graphic & Print, je souhaite un devis pour : {', '.join(type_p)}. Projet : {nom}. Détails : {details}"
+                whatsapp_url = f"https://wa.me/221778615900?text={urllib.parse.quote(msg)}"
+                st.success("Message prêt !")
+                st.markdown(f'<a href="{whatsapp_url}" target="_blank" class="wa-button">CLIQUEZ ICI POUR ENVOYER SUR WHATSAPP</a>', unsafe_allow_html=True)
+            else:
+                st.error("Veuillez remplir au moins le nom et le service.")
 
-elif current_page == "✉️ CONTACT":
-    st.markdown("## Contact")
-    st.info("📍 Dakar, Sénégal | 📞 +221 77 861 59 00")
+elif menu == "✉️ CONTACT":
+    st.markdown("<h2 style='font-family:Syne;'>Contactez-nous</h2>", unsafe_allow_html=True)
+    st.markdown(f'<div class="card">📍 Dakar, Sénégal<br>📧 contact@chic-graphic.sn<br>📞 +221 77 861 59 00</div>', unsafe_allow_html=True)
 
-st.markdown('</div>', unsafe_allow_html=True) # Fin du main-content
+st.markdown('</div>', unsafe_allow_html=True)
 
 # FOOTER
-st.markdown("""
-    <div style="text-align:center; padding:40px; color:#64A4C4; font-size:0.8rem;">
-        © 2026 CHIC Graphic & Print · Dakar
+st.markdown(f"""
+    <div style="text-align:center; padding:50px; background:#0C4A6E; color:white; border-radius:25px; margin-top:50px;">
+        <h3 style="font-family:Syne; color:white;">CHIC Graphic & Print</h3>
+        <p>© 2026 · Excellence Visuelle à Dakar</p>
     </div>
 """, unsafe_allow_html=True)
